@@ -113,9 +113,11 @@ fn print_cert_info(cert: &Certificate) {
             let exp_bytes = rsa_details.public_exponent.as_bytes();
             let exp = BigEndian::read_uint(exp_bytes, exp_bytes.len());
             println!("    Exponent: {exp} (0x{exp:0x})");
+            let mod_bytes = rsa_details.modulus.as_bytes();
             println!(
-                "    Modulus:\n      {}",
-                util::openssl_hex(rsa_details.modulus.as_bytes(), 15).join("\n      ")
+                "    Modulus({} bit):\n      {}",
+                mod_bytes.len() * 8,
+                util::openssl_hex(mod_bytes, 15).join("\n      ")
             );
         }
 
