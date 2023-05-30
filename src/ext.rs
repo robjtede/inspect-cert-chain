@@ -20,7 +20,14 @@ pub(crate) fn interpret_val(ext: &Extension) -> String {
 
 fn fmt_key_usage(ext: &Extension) -> String {
     let key_usage = pkix::KeyUsage::from_der(ext.extn_value.as_bytes()).unwrap();
-    format!("{:?}", key_usage.0)
+    format!(
+        "{}",
+        key_usage
+            .0
+            .into_iter()
+            .map(|ku| format!("{ku:?}"))
+            .join(", ")
+    )
 }
 
 fn fmt_extended_key_usage(ext: &Extension) -> String {
