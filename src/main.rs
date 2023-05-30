@@ -1,3 +1,6 @@
+#![allow(unused)]
+#![deny(rust_2018_idioms, future_incompatible)]
+
 use std::fs;
 
 use byteorder::{BigEndian, ByteOrder as _};
