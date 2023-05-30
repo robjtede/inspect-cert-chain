@@ -5,10 +5,11 @@
 # Usage
 
 ```console
-cargo run -- <path_to_pem_cert_chain>
+cargo run -- <hostname>
 ```
 
 # Roadmap
 
-- [ ] fetch certificate from URL
-- [ ] support more standard extensions
+- [x] OpenSSL-like text info
+- [x] fetch certificate from URL
+- [ ] interpret more standard X.509 extensions
