@@ -11,21 +11,31 @@ use x509_cert::Certificate;
 use crate::util::{assert_null_params, openssl_hex};
 
 mod ext;
+mod fetch;
 mod util;
 
 // let anchor = &TLS_SERVER_ROOTS.0[3]; // seems to have wrong modulus ?!?
 
 fn main() {
-    let chain_path = std::env::args().nth(1).unwrap();
+    let host = std::env::args().nth(1).unwrap();
 
-    let chain_bytes = fs::read(chain_path).unwrap();
-    for cert_bytes in certs(&chain_bytes).skip(2) {
-        let cert = Certificate::from_pem(cert_bytes).unwrap();
+    let certs = fetch::cert_chain(&host);
+
+    for cert in certs {
         print_cert_info(&cert);
 
         println!();
         println!();
     }
+
+    // let chain_bytes = fs::read(chain_path).unwrap();
+    // for cert_bytes in certs(&chain_bytes).skip(2) {
+    //     let cert = Certificate::from_pem(cert_bytes).unwrap();
+    //     print_cert_info(&cert);
+
+    //     println!();
+    //     println!();
+    // }
 }
 
 fn print_cert_info(cert: &Certificate) {
@@ -33,6 +43,11 @@ fn print_cert_info(cert: &Certificate) {
     println!("===========");
 
     let tbs = &cert.tbs_certificate;
+
+    let tbs_cert = &tbs;
+    println!("Subject: {}", tbs_cert.subject);
+
+    println!("Issuer: {}", tbs.issuer);
 
     println!("Version: {:?}", tbs.version);
     println!(
@@ -49,7 +64,6 @@ fn print_cert_info(cert: &Certificate) {
     );
     assert_null_params(&cert.signature_algorithm);
 
-    println!("Issuer: {}", tbs.issuer);
     println!(
         "Issuer Serial Number:\n  {}",
         tbs.issuer_unique_id
@@ -68,9 +82,6 @@ fn print_cert_info(cert: &Certificate) {
         tbs.validity.not_after,
         duration_since_now_fmt(tbs.validity.not_after),
     );
-
-    let tbs_cert = &tbs;
-    println!("Subject: {}", tbs_cert.subject);
 
     // if let Some(name_constraints) = anchor.name_constraints {
     //     println!("Name Constraints: {:?}", name_constraints);
