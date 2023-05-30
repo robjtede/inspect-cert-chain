@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+jobs:
+  build_and_test:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [stable, beta]
+
+    name: Test (${{ matrix.version }})
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1.4.3
+        with:
+          toolchain: ${{ matrix.version }}
+
+      - name: cargo test
+        run: cargo test --workspace --all-features --no-fail-fast -- --nocapture
