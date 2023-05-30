@@ -24,21 +24,12 @@ fn main() {
 
     let certs = fetch::cert_chain(&host);
 
-    for cert in certs {
+    for cert in certs.into_iter().take(1) {
         print_cert_info(&cert);
 
         println!();
         println!();
     }
-
-    // let chain_bytes = fs::read(chain_path).unwrap();
-    // for cert_bytes in certs(&chain_bytes).skip(2) {
-    //     let cert = Certificate::from_pem(cert_bytes).unwrap();
-    //     print_cert_info(&cert);
-
-    //     println!();
-    //     println!();
-    // }
 }
 
 fn print_cert_info(cert: &Certificate) {
@@ -143,12 +134,12 @@ fn print_cert_info(cert: &Certificate) {
 
         for ext in extensions {
             println!(
-                "  Extension ID: {}",
+                "  ID: {}{}",
                 DB.by_oid(&ext.extn_id)
                     .map(ToOwned::to_owned)
-                    .unwrap_or(ext.extn_id.to_string())
+                    .unwrap_or(ext.extn_id.to_string()),
+                if ext.critical { " (critical)" } else { "" }
             );
-            println!("  Extension Critical: {}", ext.critical);
             println!("  Extension value:\n    {}", ext::interpret_val(ext));
             println!();
         }
