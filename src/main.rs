@@ -5,13 +5,11 @@ use std::fs;
 
 use byteorder::{BigEndian, ByteOrder as _};
 use const_oid::db::rfc5912::{ID_EC_PUBLIC_KEY, RSA_ENCRYPTION};
-use const_oid::{db::DB, ObjectIdentifier};
+use const_oid::ObjectIdentifier;
 use der::{Decode as _, DecodePem};
 use itertools::Itertools as _;
 use memchr::memmem;
 use x509_cert::Certificate;
-
-use crate::util::{assert_null_params, openssl_hex};
 
 mod ext;
 mod fetch;
@@ -48,21 +46,21 @@ fn print_cert_info(cert: &Certificate) {
         "Serial Number:\n  {}",
         tbs.subject_unique_id
             .as_ref()
-            .map(|serial| openssl_hex(serial.as_bytes().unwrap(), 20).join("\n  "))
+            .map(|serial| util::openssl_hex(serial.as_bytes().unwrap(), 20).join("\n  "))
             .unwrap_or_else(|| "<unknown>".to_owned())
     );
 
     println!(
         "Signature Algorithm: {}",
-        DB.by_oid(&cert.signature_algorithm.oid).unwrap()
+        util::oid_desc_or_raw(&cert.signature_algorithm.oid)
     );
-    assert_null_params(&cert.signature_algorithm);
+    util::assert_null_params(&cert.signature_algorithm);
 
     println!(
         "Issuer Serial Number:\n  {}",
         tbs.issuer_unique_id
             .as_ref()
-            .map(|serial| openssl_hex(serial.as_bytes().unwrap(), 20).join("\n  "))
+            .map(|serial| util::openssl_hex(serial.as_bytes().unwrap(), 20).join("\n  "))
             .unwrap_or_else(|| "<unknown>".to_owned())
     );
     println!("Validity:");
@@ -95,8 +93,8 @@ fn print_cert_info(cert: &Certificate) {
                 .decode_as::<ObjectIdentifier>()
                 .unwrap();
 
-            let ec_type = DB.by_oid(&alg.oid).unwrap();
-            let ec_subtype = DB.by_oid(&ec_subtype).unwrap();
+            let ec_type = util::oid_desc_or_raw(&alg.oid);
+            let ec_subtype = util::oid_desc_or_raw(&ec_subtype);
 
             let public_key_bytes = spki.subject_public_key.as_bytes().unwrap();
             let public_key = util::openssl_hex(public_key_bytes, 15).join("\n    ");
@@ -106,7 +104,7 @@ fn print_cert_info(cert: &Certificate) {
         }
 
         _ if alg.oid == RSA_ENCRYPTION => {
-            let algorithm = DB.by_oid(&alg.oid).unwrap().to_owned();
+            let algorithm = util::oid_desc_or_raw(&alg.oid);
             println!("  Algorithm: {algorithm}");
 
             let rsa_details =
@@ -124,7 +122,7 @@ fn print_cert_info(cert: &Certificate) {
         }
 
         _ => {
-            let alg = DB.by_oid(&alg.oid).unwrap_or("unknown").to_owned();
+            let alg = util::oid_desc_or_raw(&alg.oid);
             println!("  Algorithm: {alg}");
         }
     }
@@ -135,9 +133,7 @@ fn print_cert_info(cert: &Certificate) {
         for ext in extensions {
             println!(
                 "  ID: {}{}",
-                DB.by_oid(&ext.extn_id)
-                    .map(ToOwned::to_owned)
-                    .unwrap_or(ext.extn_id.to_string()),
+                util::oid_desc_or_raw(&ext.extn_id),
                 if ext.critical { " (critical)" } else { "" }
             );
             println!("  Extension value:\n    {}", ext::interpret_val(ext));
@@ -148,7 +144,7 @@ fn print_cert_info(cert: &Certificate) {
     println!("Signature:");
     println!(
         "  {}",
-        openssl_hex(cert.signature.as_bytes().unwrap(), 20).join("\n  ")
+        util::openssl_hex(cert.signature.as_bytes().unwrap(), 20).join("\n  ")
     );
 }
 
