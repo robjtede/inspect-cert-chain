@@ -42,13 +42,9 @@ fn print_cert_info(cert: &Certificate) {
     println!("Issuer: {}", tbs.issuer);
 
     println!("Version: {:?}", tbs.version);
-    // TODO: doesn't work ?
     println!(
         "Serial Number:\n  {}",
-        tbs.subject_unique_id
-            .as_ref()
-            .map(|serial| util::openssl_hex(serial.as_bytes().unwrap(), 20).join("\n  "))
-            .unwrap_or_else(|| "<unknown>".to_owned())
+        util::openssl_hex(tbs.serial_number.as_bytes(), 20).join("\n  ")
     );
 
     println!(
