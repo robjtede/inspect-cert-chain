@@ -67,12 +67,12 @@ fn print_cert_info(cert: &Certificate) {
     println!(
         "  Not Before: {} ({})",
         tbs.validity.not_before,
-        duration_since_now_fmt(tbs.validity.not_before),
+        util::duration_since_now_fmt(tbs.validity.not_before),
     );
     println!(
         "  Not After: {} ({})",
         tbs.validity.not_after,
-        duration_since_now_fmt(tbs.validity.not_after),
+        util::duration_since_now_fmt(tbs.validity.not_after),
     );
 
     // if let Some(name_constraints) = anchor.name_constraints {
@@ -146,28 +146,6 @@ fn print_cert_info(cert: &Certificate) {
         "  {}",
         util::openssl_hex(cert.signature.as_bytes().unwrap(), 20).join("\n  ")
     );
-}
-
-fn duration_since_now_fmt(time: x509_cert::time::Time) -> String {
-    use chrono::{DateTime, Utc};
-
-    let ts = time.to_unix_duration().as_secs() as i64;
-
-    let date = DateTime::<Utc>::from_utc(
-        chrono::NaiveDateTime::from_timestamp_opt(ts, 0).unwrap(),
-        Utc,
-    );
-    let now = Utc::now();
-
-    let duration = if now > date { now - date } else { date - now };
-
-    let days = duration.num_days();
-
-    if now > date {
-        format!("{} days ago", days)
-    } else {
-        format!("in {} days", days)
-    }
 }
 
 fn certs(chain: &[u8]) -> impl Iterator<Item = Vec<u8>> + '_ {

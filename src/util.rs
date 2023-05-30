@@ -43,6 +43,28 @@ pub(crate) fn oid_desc_or_raw(oid: &ObjectIdentifier) -> String {
         .unwrap_or_else(|| oid.to_string())
 }
 
+pub(crate) fn duration_since_now_fmt(time: x509_cert::time::Time) -> String {
+    use chrono::{DateTime, Utc};
+
+    let ts = time.to_unix_duration().as_secs() as i64;
+
+    let date = DateTime::<Utc>::from_utc(
+        chrono::NaiveDateTime::from_timestamp_opt(ts, 0).unwrap(),
+        Utc,
+    );
+    let now = Utc::now();
+
+    let duration = if now > date { now - date } else { date - now };
+
+    let days = duration.num_days();
+
+    if now > date {
+        format!("{} days ago", days)
+    } else {
+        format!("in {} days", days)
+    }
+}
+
 pub(crate) fn openssl_hex(bytes: &[u8], width: usize) -> impl Iterator<Item = String> + '_ {
     let bytes = if bytes.len() < width {
         bytes
