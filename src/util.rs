@@ -2,6 +2,7 @@
 
 use std::io::Read;
 
+use const_oid::{db::DB, ObjectIdentifier};
 use itertools::Itertools as _;
 use x509_cert::spki::{AlgorithmIdentifier, AlgorithmIdentifierOwned};
 
@@ -32,8 +33,14 @@ pub(crate) fn wrap_in_sequence(bytes: &mut Vec<u8>) {
 }
 
 #[track_caller]
-pub fn assert_null_params(alg: &AlgorithmIdentifierOwned) {
+pub(crate) fn assert_null_params(alg: &AlgorithmIdentifierOwned) {
     assert!(alg.parameters.is_none() || alg.parameters.as_ref().unwrap().is_null());
+}
+
+pub(crate) fn oid_desc_or_raw(oid: &ObjectIdentifier) -> String {
+    DB.by_oid(oid)
+        .map(ToOwned::to_owned)
+        .unwrap_or_else(|| oid.to_string())
 }
 
 pub(crate) fn openssl_hex(bytes: &[u8], width: usize) -> impl Iterator<Item = String> + '_ {

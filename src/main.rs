@@ -24,7 +24,7 @@ fn main() {
 
     let certs = fetch::cert_chain(&host);
 
-    for cert in certs.into_iter().take(1) {
+    for cert in certs.into_iter() {
         print_cert_info(&cert);
 
         println!();
