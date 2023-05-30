@@ -66,12 +66,6 @@ pub(crate) fn duration_since_now_fmt(time: x509_cert::time::Time) -> String {
 }
 
 pub(crate) fn openssl_hex(bytes: &[u8], width: usize) -> impl Iterator<Item = String> + '_ {
-    let bytes = if bytes.len() < width {
-        bytes
-    } else {
-        &bytes[(bytes.len() - width)..]
-    };
-
     let n_chunks = bytes.len() / width;
 
     bytes.chunks(width).enumerate().map(move |(i, chunk)| {
