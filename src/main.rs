@@ -42,6 +42,7 @@ fn print_cert_info(cert: &Certificate) {
     println!("Issuer: {}", tbs.issuer);
 
     println!("Version: {:?}", tbs.version);
+    // TODO: doesn't work ?
     println!(
         "Serial Number:\n  {}",
         tbs.subject_unique_id
@@ -56,6 +57,7 @@ fn print_cert_info(cert: &Certificate) {
     );
     util::assert_null_params(&cert.signature_algorithm);
 
+    // TODO: doesn't work ?
     println!(
         "Issuer Serial Number:\n  {}",
         tbs.issuer_unique_id
