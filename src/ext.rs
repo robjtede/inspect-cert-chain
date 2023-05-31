@@ -1,7 +1,10 @@
 use const_oid::{db::DB, AssociatedOid as _, ObjectIdentifier};
 use der::Decode;
 use itertools::Itertools;
-use x509_cert::ext::{pkix, Extension};
+use x509_cert::ext::{
+    pkix::{self, name::GeneralName},
+    Extension,
+};
 
 use crate::util::{oid_desc_or_raw, openssl_hex};
 
@@ -20,7 +23,14 @@ pub(crate) fn interpret_val(ext: &Extension) -> String {
 
 fn fmt_key_usage(ext: &Extension) -> String {
     let key_usage = pkix::KeyUsage::from_der(ext.extn_value.as_bytes()).unwrap();
-    format!("{:?}", key_usage.0)
+    format!(
+        "{}",
+        key_usage
+            .0
+            .into_iter()
+            .map(|ku| format!("{ku:?}"))
+            .join(", ")
+    )
 }
 
 fn fmt_extended_key_usage(ext: &Extension) -> String {
@@ -37,9 +47,9 @@ fn fmt_authority_info_access_syntax(ext: &Extension) -> String {
         .into_iter()
         .map(|access_description| {
             format!(
-                "{}  {:?}",
+                "{}  {}",
                 oid_desc_or_raw(&access_description.access_method),
-                access_description.access_location
+                fmt_general_name(&access_description.access_location)
             )
         })
         .join("\n    ")
@@ -79,11 +89,28 @@ fn fmt_certificate_policies(ext: &Extension) -> String {
 
 fn fmt_subject_alt_name(ext: &Extension) -> String {
     let san = pkix::SubjectAltName::from_der(ext.extn_value.as_bytes()).unwrap();
-    san.0.into_iter().map(|name| format!("{name:?}")).join(", ")
+    san.0
+        .into_iter()
+        .map(|name| fmt_general_name(&name))
+        .join(", ")
 }
 
 fn fmt_subject_key_identifier(ext: &Extension) -> String {
     let ski = pkix::SubjectKeyIdentifier::from_der(ext.extn_value.as_bytes()).unwrap();
     let mut iter = openssl_hex(ski.0.as_bytes(), 20);
     iter.join("\n    ")
+}
+
+//TODO: remove debug format for OtherName, DirectoryName, EdiPartyName and IpAddress
+fn fmt_general_name(name: &GeneralName) -> String {
+    match name {
+        GeneralName::OtherName(other) => format!("OTHER{:?}", other),
+        GeneralName::Rfc822Name(rfc) => format!("RFC:{}", rfc.as_str()).to_string(),
+        GeneralName::DnsName(dns) => format!("DNS:{}", dns.as_str()).to_string(),
+        GeneralName::DirectoryName(dir) => format!("DIR:{:?}", dir),
+        GeneralName::EdiPartyName(edi) => format!("EDI:{:?}", edi),
+        GeneralName::UniformResourceIdentifier(uri) => format!("URI:{}", uri.as_str()).to_string(),
+        GeneralName::IpAddress(ip) => format!("IP:{:?}", ip),
+        GeneralName::RegisteredId(id) => oid_desc_or_raw(&id),
+    }
 }
