@@ -48,11 +48,10 @@ pub(crate) fn cert_chain(host: &str) -> Vec<Certificate> {
 
     tls.write_all(
         format!(
-            r#"
-GET / HTTP/1.1\r
-Host: {host}\r
-Connection: close\r
-Accept-Encoding: identity\r
+            r#"GET / HTTP/1.1
+Host: {host}
+Connection: close
+Accept-Encoding: identity
 
 "#
         )
