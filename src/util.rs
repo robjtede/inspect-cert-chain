@@ -2,7 +2,10 @@
 
 use std::io::Read;
 
-use const_oid::{db::DB, ObjectIdentifier};
+use const_oid::{
+    db::{rfc5280, rfc5912, Database, DB},
+    ObjectIdentifier,
+};
 use itertools::Itertools as _;
 use x509_cert::spki::{AlgorithmIdentifier, AlgorithmIdentifierOwned};
 
@@ -38,7 +41,8 @@ pub(crate) fn assert_null_params(alg: &AlgorithmIdentifierOwned) {
 }
 
 pub(crate) fn oid_desc_or_raw(oid: &ObjectIdentifier) -> String {
-    DB.by_oid(oid)
+    get_oid_desc(oid)
+        .or(DB.by_oid(oid))
         .map(ToOwned::to_owned)
         .unwrap_or_else(|| oid.to_string())
 }
@@ -76,3 +80,40 @@ pub(crate) fn openssl_hex(bytes: &[u8], width: usize) -> impl Iterator<Item = St
         chunk
     })
 }
+
+fn get_oid_desc(oid: &ObjectIdentifier) -> Option<&str> {
+    OID_DESCS
+        .iter()
+        .find(|(&id, _)| id == *oid)
+        .map(|&(_, desc)| desc)
+}
+
+//TODO: convert into a phf if it grows too large
+/// Contains human readable descriptions for commonly used oids
+const OID_DESCS: &[(&ObjectIdentifier, &str)] = &[
+    (
+        &rfc5280::ID_CE_SUBJECT_KEY_IDENTIFIER,
+        "Subject Key Identifier",
+    ),
+    (
+        &rfc5280::ID_CE_AUTHORITY_KEY_IDENTIFIER,
+        "Authority Key Identifier",
+    ),
+    (&rfc5280::ID_CE_KEY_USAGE, "Key Usage"),
+    (&rfc5280::ID_CE_EXT_KEY_USAGE, "Extended Key Usage"),
+    (&rfc5280::ID_CE_SUBJECT_ALT_NAME, "Subject Alternate Name"),
+    (&rfc5912::ID_KP_CLIENT_AUTH, "Client Authentication"),
+    (&rfc5912::ID_KP_SERVER_AUTH, "Server Authentication"),
+    (&rfc5912::ID_CE_BASIC_CONSTRAINTS, "Basic Constraints"),
+    (
+        &rfc5912::ID_PE_AUTHORITY_INFO_ACCESS,
+        "Authority Information Access",
+    ),
+    (
+        &rfc5912::ID_CE_CRL_DISTRIBUTION_POINTS,
+        "CRL Distribution Points",
+    ),
+    (&rfc5912::ID_CE_CERTIFICATE_POLICIES, "Certificate Policies"),
+    (&rfc5912::ID_AD_OCSP, "OCSP"),
+    (&rfc5912::ID_AD_CA_ISSUERS, "CA Issuers"),
+];
