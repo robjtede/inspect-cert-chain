@@ -12,6 +12,6 @@ hex = "0.4"
 itertools = "0.10"
 memchr = "2.4"
 pkcs1 = { version = "0.7", features = ["std"] }
-rustls = "0.21"
+rustls = { version = "0.21", features = ["dangerous_configuration"] }
 webpki-roots = "0.23"
 x509-cert = "0.2"

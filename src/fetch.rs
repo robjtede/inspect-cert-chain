@@ -6,6 +6,7 @@ use std::{
 
 use der::Decode;
 use rustls::{
+    client::ServerCertVerifier,
     internal::msgs::{
         codec::Reader,
         handshake::{CertificatePayload, HandshakeMessagePayload, HandshakePayload},
@@ -26,13 +27,17 @@ pub(crate) fn cert_chain(host: &str) -> Vec<Certificate> {
         )
     }));
 
-    let config = rustls::ClientConfig::builder()
+    let mut config = rustls::ClientConfig::builder()
         .with_safe_default_cipher_suites()
         .with_safe_default_kx_groups()
         .with_protocol_versions(&[&rustls::version::TLS12])
         .unwrap()
         .with_root_certificates(root_store)
         .with_no_client_auth();
+
+    config
+        .dangerous()
+        .set_certificate_verifier(Arc::new(NoopServerCertVerifier));
 
     let server_name = ServerName::try_from(host).unwrap();
 
@@ -70,6 +75,22 @@ Accept-Encoding: identity\r
                 .collect()
         })
         .unwrap_or_default()
+}
+
+struct NoopServerCertVerifier;
+
+impl ServerCertVerifier for NoopServerCertVerifier {
+    fn verify_server_cert(
+        &self,
+        end_entity: &rustls::Certificate,
+        intermediates: &[rustls::Certificate],
+        server_name: &ServerName,
+        scts: &mut dyn Iterator<Item = &[u8]>,
+        ocsp_response: &[u8],
+        now: std::time::SystemTime,
+    ) -> Result<rustls::client::ServerCertVerified, rustls::Error> {
+        Ok(rustls::client::ServerCertVerified::assertion())
+    }
 }
 
 struct TlsInspector {
