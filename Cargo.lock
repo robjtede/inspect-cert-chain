@@ -79,6 +79,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e496a50fda8aacccc86d7529e2c1e0892dbd0f898a6b5645b5561b89c3210efa"
 
 [[package]]
+name = "ct-sct"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "30768f6c82719fabe8206c736dff3a0a691351a1e6fb36b8151bee4231671d88"
+dependencies = [
+ "const-oid",
+ "der",
+ "x509-cert",
+]
+
+[[package]]
 name = "der"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -151,6 +162,7 @@ dependencies = [
  "byteorder",
  "chrono",
  "const-oid",
+ "ct-sct",
  "der",
  "hex",
  "itertools",

@@ -1,4 +1,5 @@
 use const_oid::{db::DB, AssociatedOid as _, ObjectIdentifier};
+use ct_sct::sct;
 use der::Decode;
 use itertools::Itertools;
 use x509_cert::ext::{
@@ -17,6 +18,7 @@ pub(crate) fn interpret_val(ext: &Extension) -> String {
         pkix::AuthorityInfoAccessSyntax::OID => fmt_authority_info_access_syntax(ext),
         pkix::KeyUsage::OID => fmt_key_usage(ext),
         pkix::ExtendedKeyUsage::OID => fmt_extended_key_usage(ext),
+        sct::SctList::OID => fmt_sct_list(ext),
         _ => openssl_hex(ext.extn_value.as_bytes(), 80).join("\n    "),
     }
 }
@@ -36,6 +38,26 @@ fn fmt_key_usage(ext: &Extension) -> String {
 fn fmt_extended_key_usage(ext: &Extension) -> String {
     let key_usage = pkix::ExtendedKeyUsage::from_der(ext.extn_value.as_bytes()).unwrap();
     key_usage.0.iter().map(oid_desc_or_raw).join("\n    ")
+}
+
+fn fmt_sct_list(ext: &Extension) -> String {
+    let sct_list = sct::SctList::from_der(ext.extn_value.as_bytes()).unwrap();
+    let list =
+        sct::TlsSctList::from_sct_list(&sct_list).expect("Failed to deserialize tls sct list");
+    list.scts.iter().map(fmt_sct).join("\n    ")
+}
+
+fn fmt_sct(sct: &sct::TlsSct) -> String {
+    let extensions = openssl_hex(&sct.extensions, 16).join("\n                  ");
+    format!(
+        "Signed Certificate Timestamp:\n      Version   : {}\n      Log ID    : {}\n      Timestamp : {}\n      Extensions: {}\n      Signature : {}\n                  {}",
+        sct.version,
+        openssl_hex(&sct.log_id, 16).join("\n                  "),
+        sct.timestamp,
+        if extensions.is_empty() { "none" } else { &extensions },
+        sct.sign.sign_and_hash_algo,
+        openssl_hex(&sct.sign.sign, 16).join("\n                  "),
+    )
 }
 
 fn fmt_authority_info_access_syntax(ext: &Extension) -> String {

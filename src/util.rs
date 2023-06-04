@@ -6,6 +6,7 @@ use const_oid::{
     db::{rfc5280, rfc5912, Database, DB},
     ObjectIdentifier,
 };
+use ct_sct::sct::CT_PRECERT_SCTS;
 use itertools::Itertools as _;
 use x509_cert::spki::{AlgorithmIdentifier, AlgorithmIdentifierOwned};
 
@@ -116,4 +117,5 @@ const OID_DESCS: &[(&ObjectIdentifier, &str)] = &[
     (&rfc5912::ID_CE_CERTIFICATE_POLICIES, "Certificate Policies"),
     (&rfc5912::ID_AD_OCSP, "OCSP"),
     (&rfc5912::ID_AD_CA_ISSUERS, "CA Issuers"),
+    (&CT_PRECERT_SCTS, "CT Precertificate SCTs"),
 ];
