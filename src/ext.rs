@@ -3,7 +3,7 @@ use ct_sct::sct;
 use der::Decode;
 use itertools::Itertools;
 use x509_cert::ext::{
-    pkix::{self, name::GeneralName},
+    pkix::{self, name::GeneralName, AuthorityKeyIdentifier},
     Extension,
 };
 
@@ -18,6 +18,7 @@ pub(crate) fn interpret_val(ext: &Extension) -> String {
         pkix::AuthorityInfoAccessSyntax::OID => fmt_authority_info_access_syntax(ext),
         pkix::KeyUsage::OID => fmt_key_usage(ext),
         pkix::ExtendedKeyUsage::OID => fmt_extended_key_usage(ext),
+        pkix::AuthorityKeyIdentifier::OID => fmt_authority_key_identifier(ext),
         sct::SctList::OID => fmt_sct_list(ext),
         _ => openssl_hex(ext.extn_value.as_bytes(), 80).join("\n    "),
     }
@@ -38,6 +39,54 @@ fn fmt_key_usage(ext: &Extension) -> String {
 fn fmt_extended_key_usage(ext: &Extension) -> String {
     let key_usage = pkix::ExtendedKeyUsage::from_der(ext.extn_value.as_bytes()).unwrap();
     key_usage.0.iter().map(oid_desc_or_raw).join("\n    ")
+}
+
+fn fmt_authority_key_identifier(ext: &Extension) -> String {
+    let aki = pkix::AuthorityKeyIdentifier::from_der(ext.extn_value.as_bytes()).unwrap();
+    let key_id = fmt_aki_key_id(&aki);
+    let issuer = fmt_aki_issuer(&aki);
+    let serial = fmt_aki_serial(&aki);
+    format!("{key_id}{issuer}{serial}")
+}
+
+fn fmt_aki_key_id(aki: &AuthorityKeyIdentifier) -> String {
+    if let Some(ref key_id) = aki.key_identifier {
+        format!("KeyId: {}", openssl_hex(key_id.as_bytes(), 20).join("\n"))
+    } else {
+        format!("")
+    }
+}
+
+fn fmt_aki_issuer(aki: &AuthorityKeyIdentifier) -> String {
+    if let Some(ref issuer) = aki.authority_cert_issuer {
+        format!(
+            "{}Issuer: {}",
+            if aki.key_identifier.is_some() {
+                "\n    "
+            } else {
+                "    "
+            },
+            issuer.iter().map(fmt_general_name).join(", ")
+        )
+    } else {
+        format!("")
+    }
+}
+
+fn fmt_aki_serial(aki: &AuthorityKeyIdentifier) -> String {
+    if let Some(ref serial) = aki.authority_cert_serial_number {
+        format!(
+            "{}Serial: {}",
+            if aki.key_identifier.is_some() || aki.authority_cert_issuer.is_some() {
+                "\n    "
+            } else {
+                "    "
+            },
+            openssl_hex(serial.as_bytes(), 20).join("\n")
+        )
+    } else {
+        format!("")
+    }
 }
 
 fn fmt_sct_list(ext: &Extension) -> String {
@@ -123,13 +172,13 @@ fn fmt_subject_key_identifier(ext: &Extension) -> String {
     iter.join("\n    ")
 }
 
-//TODO: remove debug format for OtherName, DirectoryName, EdiPartyName and IpAddress
+//TODO: remove debug format for OtherName, EdiPartyName and IpAddress
 fn fmt_general_name(name: &GeneralName) -> String {
     match name {
         GeneralName::OtherName(other) => format!("OTHER{:?}", other),
         GeneralName::Rfc822Name(rfc) => format!("RFC:{}", rfc.as_str()).to_string(),
         GeneralName::DnsName(dns) => format!("DNS:{}", dns.as_str()).to_string(),
-        GeneralName::DirectoryName(dir) => format!("DIR:{:?}", dir),
+        GeneralName::DirectoryName(dir) => format!("DIR:{}", dir),
         GeneralName::EdiPartyName(edi) => format!("EDI:{:?}", edi),
         GeneralName::UniformResourceIdentifier(uri) => format!("URI:{}", uri.as_str()).to_string(),
         GeneralName::IpAddress(ip) => format!("IP:{:?}", ip),
