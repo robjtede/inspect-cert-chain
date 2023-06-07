@@ -26,14 +26,11 @@ pub(crate) fn interpret_val(ext: &Extension) -> String {
 
 fn fmt_key_usage(ext: &Extension) -> String {
     let key_usage = pkix::KeyUsage::from_der(ext.extn_value.as_bytes()).unwrap();
-    format!(
-        "{}",
-        key_usage
-            .0
-            .into_iter()
-            .map(|ku| format!("{ku:?}"))
-            .join(", ")
-    )
+    key_usage
+        .0
+        .into_iter()
+        .map(|ku| format!("{ku:?}"))
+        .join(", ")
 }
 
 fn fmt_extended_key_usage(ext: &Extension) -> String {
@@ -53,7 +50,7 @@ fn fmt_aki_key_id(aki: &AuthorityKeyIdentifier) -> String {
     if let Some(ref key_id) = aki.key_identifier {
         format!("KeyId: {}", openssl_hex(key_id.as_bytes(), 20).join("\n"))
     } else {
-        format!("")
+        String::new()
     }
 }
 
@@ -69,7 +66,7 @@ fn fmt_aki_issuer(aki: &AuthorityKeyIdentifier) -> String {
             issuer.iter().map(fmt_general_name).join(", ")
         )
     } else {
-        format!("")
+        String::new()
     }
 }
 
@@ -85,7 +82,7 @@ fn fmt_aki_serial(aki: &AuthorityKeyIdentifier) -> String {
             openssl_hex(serial.as_bytes(), 20).join("\n")
         )
     } else {
-        format!("")
+        String::new()
     }
 }
 
@@ -176,12 +173,12 @@ fn fmt_subject_key_identifier(ext: &Extension) -> String {
 fn fmt_general_name(name: &GeneralName) -> String {
     match name {
         GeneralName::OtherName(other) => format!("OTHER{:?}", other),
-        GeneralName::Rfc822Name(rfc) => format!("RFC:{}", rfc.as_str()).to_string(),
-        GeneralName::DnsName(dns) => format!("DNS:{}", dns.as_str()).to_string(),
+        GeneralName::Rfc822Name(rfc) => format!("RFC:{}", rfc.as_str()),
+        GeneralName::DnsName(dns) => format!("DNS:{}", dns.as_str()),
         GeneralName::DirectoryName(dir) => format!("DIR:{}", dir),
         GeneralName::EdiPartyName(edi) => format!("EDI:{:?}", edi),
-        GeneralName::UniformResourceIdentifier(uri) => format!("URI:{}", uri.as_str()).to_string(),
+        GeneralName::UniformResourceIdentifier(uri) => format!("URI:{}", uri.as_str()),
         GeneralName::IpAddress(ip) => format!("IP:{:?}", ip),
-        GeneralName::RegisteredId(id) => oid_desc_or_raw(&id),
+        GeneralName::RegisteredId(id) => oid_desc_or_raw(id),
     }
 }
