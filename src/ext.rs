@@ -1,3 +1,5 @@
+use std::net::{IpAddr, Ipv4Addr};
+
 use const_oid::{db::DB, AssociatedOid as _, ObjectIdentifier};
 use ct_sct::sct;
 use der::Decode;
@@ -133,6 +135,7 @@ fn fmt_basic_constraints(ext: &Extension) -> String {
 
 fn fmt_certificate_policies(ext: &Extension) -> String {
     const DV: ObjectIdentifier = ObjectIdentifier::new_unwrap("2.23.140.1.2.1");
+    const OV: ObjectIdentifier = ObjectIdentifier::new_unwrap("2.23.140.1.2.2");
 
     let policies = pkix::CertificatePolicies::from_der(ext.extn_value.as_bytes()).unwrap();
     policies
@@ -143,7 +146,8 @@ fn fmt_certificate_policies(ext: &Extension) -> String {
                 "{}{}",
                 match info.policy_identifier {
                     DV => "domain-validated".to_owned(),
-                    _ => info.policy_identifier.to_string(),
+                    OV => "organization-validated".to_owned(),
+                    _ => oid_desc_or_raw(&info.policy_identifier),
                 },
                 if info.policy_qualifiers.is_some() {
                     " (has qualifiers)"
@@ -169,7 +173,7 @@ fn fmt_subject_key_identifier(ext: &Extension) -> String {
     iter.join("\n    ")
 }
 
-//TODO: remove debug format for OtherName, EdiPartyName and IpAddress
+//TODO: remove debug format for OtherName, EdiPartyName
 fn fmt_general_name(name: &GeneralName) -> String {
     match name {
         GeneralName::OtherName(other) => format!("OTHER{:?}", other),
@@ -178,7 +182,18 @@ fn fmt_general_name(name: &GeneralName) -> String {
         GeneralName::DirectoryName(dir) => format!("DIR:{}", dir),
         GeneralName::EdiPartyName(edi) => format!("EDI:{:?}", edi),
         GeneralName::UniformResourceIdentifier(uri) => format!("URI:{}", uri.as_str()),
-        GeneralName::IpAddress(ip) => format!("IP:{:?}", ip),
+        GeneralName::IpAddress(ip) => match ip_try_from_bytes(ip.as_bytes()) {
+            Some(ip) => format!("IP:{}", ip),
+            None => format!("IP:{:?}", ip),
+        },
         GeneralName::RegisteredId(id) => oid_desc_or_raw(id),
     }
+}
+
+fn ip_try_from_bytes(bytes: &[u8]) -> Option<IpAddr> {
+    Some(match bytes.len() {
+        4 => IpAddr::from(<[u8; 4]>::try_from(bytes).unwrap()),
+        16 => IpAddr::from(<[u8; 16]>::try_from(bytes).unwrap()),
+        _ => return None,
+    })
 }

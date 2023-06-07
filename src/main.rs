@@ -117,7 +117,7 @@ fn print_cert_info(cert: &Certificate) {
             println!(
                 "    Modulus({} bit):\n      {}",
                 mod_bytes.len() * 8,
-                util::openssl_hex(mod_bytes, 15).join("\n      ")
+                util::openssl_hex(mod_bytes, 32).join("\n      ")
             );
         }
 
