@@ -73,7 +73,7 @@ Accept-Encoding: identity
                 .filter_map(|c| Certificate::from_der(&c.0).ok())
                 .collect()
         })
-        .unwrap_or_else(|| Vec::new())
+        .unwrap_or_else(Vec::new)
 }
 
 struct NoopServerCertVerifier;
