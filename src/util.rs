@@ -90,7 +90,7 @@ fn get_oid_desc(oid: &ObjectIdentifier) -> Option<&str> {
 }
 
 //TODO: convert into a phf if it grows too large
-/// Contains human readable descriptions for commonly used oids
+/// Contains human readable descriptions for commonly used OIDs.
 const OID_DESCS: &[(&ObjectIdentifier, &str)] = &[
     (
         &rfc5280::ID_CE_SUBJECT_KEY_IDENTIFIER,
@@ -118,4 +118,24 @@ const OID_DESCS: &[(&ObjectIdentifier, &str)] = &[
     (&rfc5912::ID_AD_OCSP, "OCSP"),
     (&rfc5912::ID_AD_CA_ISSUERS, "CA Issuers"),
     (&CT_PRECERT_SCTS, "CT Precertificate SCTs"),
+    (
+        &ObjectIdentifier::new_unwrap("2.23.140.1.1"),
+        "Extended Validation (EV) Guidelines",
+    ),
+    (
+        &ObjectIdentifier::new_unwrap("2.23.140.1.2.1"),
+        "Domain Validated",
+    ),
+    (
+        &ObjectIdentifier::new_unwrap("2.23.140.1.2.2"),
+        "Organization Validated",
+    ),
+    (
+        &ObjectIdentifier::new_unwrap("2.23.140.1.2.3"),
+        "Individual Validated",
+    ),
+    (
+        &ObjectIdentifier::new_unwrap("2.16.840.1.114412.2.1"),
+        "DigiCert Extended Validation (EV) Guidelines",
+    ),
 ];

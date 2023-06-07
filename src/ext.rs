@@ -134,27 +134,25 @@ fn fmt_basic_constraints(ext: &Extension) -> String {
 }
 
 fn fmt_certificate_policies(ext: &Extension) -> String {
-    const DV: ObjectIdentifier = ObjectIdentifier::new_unwrap("2.23.140.1.2.1");
-    const OV: ObjectIdentifier = ObjectIdentifier::new_unwrap("2.23.140.1.2.2");
-
     let policies = pkix::CertificatePolicies::from_der(ext.extn_value.as_bytes()).unwrap();
     policies
         .0
         .into_iter()
         .map(|info| {
-            format!(
-                "{}{}",
-                match info.policy_identifier {
-                    DV => "domain-validated".to_owned(),
-                    OV => "organization-validated".to_owned(),
-                    _ => oid_desc_or_raw(&info.policy_identifier),
-                },
-                if info.policy_qualifiers.is_some() {
-                    " (has qualifiers)"
-                } else {
-                    ""
-                }
-            )
+            let qualifiers = info
+                .policy_qualifiers
+                .map(|qualifiers| {
+                    format!(
+                        " (qualifiers: {})",
+                        qualifiers
+                            .into_iter()
+                            .map(|qualifier| oid_desc_or_raw(&qualifier.policy_qualifier_id))
+                            .join(", ")
+                    )
+                })
+                .unwrap_or_default();
+
+            format!("{}{}", oid_desc_or_raw(&info.policy_identifier), qualifiers)
         })
         .join("\n    ")
 }
