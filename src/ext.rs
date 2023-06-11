@@ -8,7 +8,7 @@ use ct_sct::sct;
 use der::Decode;
 use itertools::Itertools;
 use x509_cert::ext::{
-    pkix::{self, name::GeneralName, AuthorityKeyIdentifier},
+    pkix::{self, crl::dp::DistributionPoint, name::GeneralName, AuthorityKeyIdentifier},
     Extension,
 };
 
@@ -24,6 +24,7 @@ pub(crate) fn interpret_val(ext: &Extension) -> String {
         pkix::KeyUsage::OID => fmt_key_usage(ext),
         pkix::ExtendedKeyUsage::OID => fmt_extended_key_usage(ext),
         pkix::AuthorityKeyIdentifier::OID => fmt_authority_key_identifier(ext),
+        pkix::CrlDistributionPoints::OID => fmt_crl_distribution_points(ext),
         sct::SctList::OID => fmt_sct_list(ext),
         _ => openssl_hex(ext.extn_value.as_bytes(), 80).join("\n    "),
     }
@@ -88,6 +89,82 @@ fn fmt_aki_serial(aki: &AuthorityKeyIdentifier) -> String {
         )
     } else {
         String::new()
+    }
+}
+
+fn fmt_crl_distribution_points(ext: &Extension) -> String {
+    let crl_dp = pkix::CrlDistributionPoints::from_der(ext.extn_value.as_bytes()).unwrap();
+    crl_dp.0.iter().map(fmt_crl_distribution_point).join(", ")
+}
+
+fn fmt_crl_distribution_point(dp: &DistributionPoint) -> String {
+    let name = fmt_dp_name(dp);
+    let issuer = fmt_dp_crl_issuer(dp);
+    let reason = fmt_dp_reasons(dp);
+    format!("{name}{issuer}{reason}")
+}
+
+fn fmt_dp_name(dp: &DistributionPoint) -> String {
+    if let Some(ref dp_name) = dp.distribution_point {
+        match dp_name {
+            pkix::name::DistributionPointName::FullName(names) => {
+                format!(
+                    "FullName:\n      {}",
+                    names.iter().map(fmt_general_name).join(", ")
+                )
+            }
+            pkix::name::DistributionPointName::NameRelativeToCRLIssuer(name) => {
+                format!("RelativeName:\n      {name}")
+            }
+        }
+    } else {
+        String::new()
+    }
+}
+
+fn fmt_dp_crl_issuer(dp: &DistributionPoint) -> String {
+    if let Some(ref issuer) = dp.crl_issuer {
+        format!(
+            "{}Issuer: {}",
+            if dp.distribution_point.is_some() {
+                "\n    "
+            } else {
+                "    "
+            },
+            issuer.iter().map(fmt_general_name).join(", ")
+        )
+    } else {
+        String::new()
+    }
+}
+
+fn fmt_dp_reasons(dp: &DistributionPoint) -> String {
+    if let Some(ref reasons) = dp.reasons {
+        format!(
+            "{}Reasons: {}",
+            if dp.distribution_point.is_some() || dp.crl_issuer.is_some() {
+                "\n    "
+            } else {
+                "    "
+            },
+            reasons.into_iter().map(fmt_reason).join(", ")
+        )
+    } else {
+        String::new()
+    }
+}
+
+fn fmt_reason(reason: pkix::crl::dp::Reasons) -> &'static str {
+    match reason {
+        pkix::crl::dp::Reasons::Unused => "Unused",
+        pkix::crl::dp::Reasons::KeyCompromise => "KeyCompromise",
+        pkix::crl::dp::Reasons::CaCompromise => "CaCompromise",
+        pkix::crl::dp::Reasons::AffiliationChanged => "AffiliationChanged",
+        pkix::crl::dp::Reasons::Superseded => "Superseded",
+        pkix::crl::dp::Reasons::CessationOfOperation => "CessationOfOperation",
+        pkix::crl::dp::Reasons::CertificateHold => "CertificateHold",
+        pkix::crl::dp::Reasons::PrivilegeWithdrawn => "PrivilegeWithdrawn",
+        pkix::crl::dp::Reasons::AaCompromise => "AaCompromise",
     }
 }
 
