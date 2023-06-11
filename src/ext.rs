@@ -1,4 +1,7 @@
-use std::net::{IpAddr, Ipv4Addr};
+use std::{
+    borrow::Cow,
+    net::{IpAddr, Ipv4Addr},
+};
 
 use const_oid::{db::DB, AssociatedOid as _, ObjectIdentifier};
 use ct_sct::sct;
@@ -127,9 +130,12 @@ fn fmt_authority_info_access_syntax(ext: &Extension) -> String {
 
 fn fmt_basic_constraints(ext: &Extension) -> String {
     let constraints = pkix::BasicConstraints::from_der(ext.extn_value.as_bytes()).unwrap();
+    let path_len = constraints
+        .path_len_constraint
+        .map_or(Cow::Borrowed("None"), |c| Cow::Owned(format!("{c}")));
     format!(
-        "CA: {}\n    Path Length Constraint: {:?}",
-        constraints.ca, constraints.path_len_constraint
+        "CA: {}\n    Path Length Constraint: {path_len}",
+        constraints.ca
     )
 }
 
