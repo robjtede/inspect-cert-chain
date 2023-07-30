@@ -4,8 +4,10 @@
 use std::fs;
 
 use byteorder::{BigEndian, ByteOrder as _};
-use const_oid::db::rfc5912::{ID_EC_PUBLIC_KEY, RSA_ENCRYPTION};
-use const_oid::ObjectIdentifier;
+use const_oid::{
+    db::rfc5912::{ID_EC_PUBLIC_KEY, RSA_ENCRYPTION},
+    ObjectIdentifier,
+};
 use der::{Decode as _, DecodePem};
 use itertools::Itertools as _;
 use memchr::memmem;

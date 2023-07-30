@@ -1,7 +1,10 @@
 {
     "cSpell.words": [
         "byteorder",
+        "extn",
         "itertools",
+        "memchr",
+        "memmem",
         "rustls",
         "spki",
         "webpki"

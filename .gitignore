@@ -1,1 +1,5 @@
-/target/
+# direnv
+.direnv
+
+# Rust
+target/
