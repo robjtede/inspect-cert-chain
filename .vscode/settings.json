@@ -5,7 +5,9 @@
         "itertools",
         "memchr",
         "memmem",
+        "ocsp",
         "rustls",
+        "scts",
         "spki",
         "webpki"
     ]
