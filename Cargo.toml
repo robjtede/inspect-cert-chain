@@ -11,7 +11,7 @@ ct-sct = "0.1"
 der = { version = "0.7", features = ["std"] }
 hex = "0.4"
 itertools = "0.11"
-memchr = "2.4"
+memchr = "2.6"
 pkcs1 = { version = "0.7", features = ["std"] }
 rustls = { version = "0.21", features = ["dangerous_configuration"] }
 webpki-roots = "0.25"
