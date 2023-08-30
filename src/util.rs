@@ -2,6 +2,7 @@
 
 use std::io::Read;
 
+use chrono::TimeZone as _;
 use const_oid::{
     db::{rfc5280, rfc5912, Database, DB},
     ObjectIdentifier,
@@ -53,10 +54,7 @@ pub(crate) fn duration_since_now_fmt(time: x509_cert::time::Time) -> String {
 
     let ts = time.to_unix_duration().as_secs() as i64;
 
-    let date = DateTime::<Utc>::from_utc(
-        chrono::NaiveDateTime::from_timestamp_opt(ts, 0).unwrap(),
-        Utc,
-    );
+    let date = Utc.from_utc_datetime(&chrono::NaiveDateTime::from_timestamp_opt(ts, 0).unwrap());
     let now = Utc::now();
 
     let duration = if now > date { now - date } else { date - now };
