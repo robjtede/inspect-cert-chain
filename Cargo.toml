@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 byteorder = "1"
 chrono = { version = "0.4.29", default-features = false, features = ["clock", "serde"] }
+clap = { version = "4", features = ["derive"] }
 const-oid = { version = "0.9", features = ["std", "db"] }
 ct-sct = "0.1"
 der = { version = "0.7", features = ["std"] }
@@ -14,5 +15,6 @@ itertools = "0.11"
 memchr = "2.6"
 pkcs1 = { version = "0.7", features = ["std"] }
 rustls = { version = "0.21", features = ["dangerous_configuration"] }
+rustls-pemfile = "1"
 webpki-roots = "0.25"
 x509-cert = "0.2"

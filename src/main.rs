@@ -1,9 +1,13 @@
 #![allow(unused)]
 #![deny(rust_2018_idioms, future_incompatible)]
 
-use std::fs;
+use std::{
+    fs,
+    io::{self, Read},
+};
 
 use byteorder::{BigEndian, ByteOrder as _};
+use clap::Parser;
 use const_oid::{
     db::rfc5912::{ID_EC_PUBLIC_KEY, RSA_ENCRYPTION},
     ObjectIdentifier,
@@ -17,12 +21,41 @@ mod ext;
 mod fetch;
 mod util;
 
+#[derive(Debug, Parser)]
+struct Args {
+    #[clap(long, conflicts_with = "file")]
+    host: Option<String>,
+
+    #[clap(long, conflicts_with = "host")]
+    file: Option<String>,
+}
+
 // let anchor = &TLS_SERVER_ROOTS.0[3]; // seems to have wrong modulus ?!?
 
 fn main() {
-    let host = std::env::args().nth(1).unwrap();
+    let args = Args::parse();
 
-    let certs = fetch::cert_chain(&host);
+    let certs = if let Some(host) = &args.host {
+        fetch::cert_chain(host)
+    } else if let Some(file) = args.file {
+        let mut input = if file == "-" {
+            let mut buf = String::new();
+            let stdin = io::stdin().read_to_string(&mut buf).unwrap();
+            Box::new(io::Cursor::new(buf)) as Box<dyn io::BufRead>
+        } else {
+            let file = fs::File::open(file).unwrap();
+            Box::new(io::BufReader::new(file)) as Box<dyn io::BufRead>
+        };
+
+        rustls_pemfile::certs(&mut input)
+            .unwrap()
+            .into_iter()
+            .map(|der| x509_cert::Certificate::from_der(&der).unwrap())
+            .collect()
+    } else {
+        eprintln!("use --host or --file");
+        return;
+    };
 
     for cert in certs.into_iter() {
         print_cert_info(&cert);
