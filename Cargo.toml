@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 byteorder = "1"
-chrono = { version = "0.4.30", features = ["serde"] }
+chrono = { version = "0.4.31", features = ["serde"] }
 clap = { version = "4", features = ["derive"] }
 const-oid = { version = "0.9", features = ["std", "db"] }
 ct-sct = "0.1"
