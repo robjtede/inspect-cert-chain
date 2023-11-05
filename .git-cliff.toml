@@ -9,11 +9,17 @@ body = """
 {% else %}\
     ## Unreleased
 {% endif %}\
-{% for group, commits in commits | group_by(attribute="group") %}
+{% for group, commits in commits | filter(attribute="group", value="Features") | group_by(attribute="group") %}
     ### {{ group | upper_first }}
     {% for commit in commits %}
         - {{ commit.message | upper_first }}\
-    {% endfor %}
+    {% endfor %}\
+{% endfor %}\n
+{% for group, commits in commits | filter(attribute="group", value="Fixes") | group_by(attribute="group") %}\
+    ### {{ group | upper_first }}
+    {% for commit in commits %}
+        - {{ commit.message | upper_first }}\
+    {% endfor %}\
 {% endfor %}\n
 """
 trim = true
@@ -23,14 +29,6 @@ conventional_commits = true
 filter_unconventional = true
 commit_parsers = [
   { message = "^feat", group = "Features" },
-  { message = "^fix", group = "Bug Fixes" },
-  { message = "^doc", group = "Documentation" },
-  { message = "^perf", group = "Performance" },
-  { message = "^refactor", group = "Refactor" },
-  { message = "^style", group = "Styling" },
-  { message = "^test", group = "Testing" },
-  { message = "^chore", group = "Miscellaneous Tasks", skip = true },
-  { message = "^revert", group = "Revert" },
-  { body = ".*security", group = "Security" },
+  { message = "^fix", group = "Fixes" },
 ]
 filter_commits = true
