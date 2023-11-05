@@ -15,6 +15,7 @@
             config.formatter
             pkgs.nodePackages.prettier
             pkgs.taplo
+            pkgs.watchexec
             pkgs.just
           ] ++ lib.optional pkgs.stdenv.isDarwin [
             pkgs.pkgsBuildHost.libiconv
