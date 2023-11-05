@@ -1,14 +1,11 @@
-use std::{
-    borrow::Cow,
-    net::{IpAddr, Ipv4Addr},
-};
+use std::{borrow::Cow, net::IpAddr};
 
-use const_oid::{db::DB, AssociatedOid as _, ObjectIdentifier};
+use const_oid::AssociatedOid as _;
 use ct_sct::sct;
 use der::Decode;
 use itertools::Itertools;
 use x509_cert::ext::{
-    pkix::{self, crl::dp::DistributionPoint, name::GeneralName, AuthorityKeyIdentifier},
+    pkix::{self, crl::dp, name::GeneralName, AuthorityKeyIdentifier},
     Extension,
 };
 
@@ -97,14 +94,14 @@ fn fmt_crl_distribution_points(ext: &Extension) -> String {
     crl_dp.0.iter().map(fmt_crl_distribution_point).join(", ")
 }
 
-fn fmt_crl_distribution_point(dp: &DistributionPoint) -> String {
+fn fmt_crl_distribution_point(dp: &dp::DistributionPoint) -> String {
     let name = fmt_dp_name(dp);
     let issuer = fmt_dp_crl_issuer(dp);
     let reason = fmt_dp_reasons(dp);
     format!("{name}{issuer}{reason}")
 }
 
-fn fmt_dp_name(dp: &DistributionPoint) -> String {
+fn fmt_dp_name(dp: &dp::DistributionPoint) -> String {
     if let Some(ref dp_name) = dp.distribution_point {
         match dp_name {
             pkix::name::DistributionPointName::FullName(names) => {
@@ -122,7 +119,7 @@ fn fmt_dp_name(dp: &DistributionPoint) -> String {
     }
 }
 
-fn fmt_dp_crl_issuer(dp: &DistributionPoint) -> String {
+fn fmt_dp_crl_issuer(dp: &dp::DistributionPoint) -> String {
     if let Some(ref issuer) = dp.crl_issuer {
         format!(
             "{}Issuer: {}",
@@ -138,7 +135,7 @@ fn fmt_dp_crl_issuer(dp: &DistributionPoint) -> String {
     }
 }
 
-fn fmt_dp_reasons(dp: &DistributionPoint) -> String {
+fn fmt_dp_reasons(dp: &dp::DistributionPoint) -> String {
     if let Some(ref reasons) = dp.reasons {
         format!(
             "{}Reasons: {}",
@@ -154,17 +151,17 @@ fn fmt_dp_reasons(dp: &DistributionPoint) -> String {
     }
 }
 
-fn fmt_reason(reason: pkix::crl::dp::Reasons) -> &'static str {
+fn fmt_reason(reason: dp::Reasons) -> &'static str {
     match reason {
-        pkix::crl::dp::Reasons::Unused => "Unused",
-        pkix::crl::dp::Reasons::KeyCompromise => "KeyCompromise",
-        pkix::crl::dp::Reasons::CaCompromise => "CaCompromise",
-        pkix::crl::dp::Reasons::AffiliationChanged => "AffiliationChanged",
-        pkix::crl::dp::Reasons::Superseded => "Superseded",
-        pkix::crl::dp::Reasons::CessationOfOperation => "CessationOfOperation",
-        pkix::crl::dp::Reasons::CertificateHold => "CertificateHold",
-        pkix::crl::dp::Reasons::PrivilegeWithdrawn => "PrivilegeWithdrawn",
-        pkix::crl::dp::Reasons::AaCompromise => "AaCompromise",
+        dp::Reasons::Unused => "Unused",
+        dp::Reasons::KeyCompromise => "KeyCompromise",
+        dp::Reasons::CaCompromise => "CaCompromise",
+        dp::Reasons::AffiliationChanged => "AffiliationChanged",
+        dp::Reasons::Superseded => "Superseded",
+        dp::Reasons::CessationOfOperation => "CessationOfOperation",
+        dp::Reasons::CertificateHold => "CertificateHold",
+        dp::Reasons::PrivilegeWithdrawn => "PrivilegeWithdrawn",
+        dp::Reasons::AaCompromise => "AaCompromise",
     }
 }
 

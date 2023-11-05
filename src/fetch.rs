@@ -1,19 +1,11 @@
 use std::{
-    io::{self, Read, Write as _},
+    io::{Read as _, Write as _},
     net::TcpStream,
     sync::Arc,
 };
 
 use der::Decode;
-use rustls::{
-    client::ServerCertVerifier,
-    internal::msgs::{
-        codec::Reader,
-        handshake::{CertificatePayload, HandshakeMessagePayload, HandshakePayload},
-        message::{Message, MessagePayload, OpaqueMessage},
-    },
-    OwnedTrustAnchor, RootCertStore, ServerName,
-};
+use rustls::{client::ServerCertVerifier, OwnedTrustAnchor, RootCertStore, ServerName};
 use x509_cert::Certificate;
 
 pub(crate) fn cert_chain(host: &str) -> Vec<Certificate> {
@@ -81,12 +73,12 @@ struct NoopServerCertVerifier;
 impl ServerCertVerifier for NoopServerCertVerifier {
     fn verify_server_cert(
         &self,
-        end_entity: &rustls::Certificate,
-        intermediates: &[rustls::Certificate],
-        server_name: &ServerName,
-        scts: &mut dyn Iterator<Item = &[u8]>,
-        ocsp_response: &[u8],
-        now: std::time::SystemTime,
+        _end_entity: &rustls::Certificate,
+        _intermediates: &[rustls::Certificate],
+        _server_name: &ServerName,
+        _scts: &mut dyn Iterator<Item = &[u8]>,
+        _ocsp_response: &[u8],
+        _now: std::time::SystemTime,
     ) -> Result<rustls::client::ServerCertVerified, rustls::Error> {
         Ok(rustls::client::ServerCertVerified::assertion())
     }

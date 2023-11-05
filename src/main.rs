@@ -13,7 +13,6 @@ use const_oid::{
 };
 use der::Decode as _;
 use itertools::Itertools as _;
-use memchr::memmem;
 use x509_cert::Certificate;
 
 mod ext;
@@ -181,34 +180,4 @@ fn print_cert_info(cert: &Certificate) {
         "  {}",
         util::openssl_hex(cert.signature.as_bytes().unwrap(), 20).join("\n  ")
     );
-}
-
-fn certs(chain: &[u8]) -> impl Iterator<Item = Vec<u8>> + '_ {
-    let needle = b"-----END CERTIFICATE-----";
-
-    let mut start_idx = 0;
-
-    std::iter::from_fn(move || {
-        if chain[start_idx..] == [0x0d]
-            || chain[start_idx..] == [0x0d, 0x0a]
-            || chain[start_idx..].is_empty()
-        {
-            return None;
-        }
-
-        if let Some(idx) = memmem::find(&chain[start_idx..], needle) {
-            let cert = &chain[start_idx..(start_idx + idx + 25)];
-            start_idx += idx + 26;
-
-            if chain[start_idx] == 0x0a {
-                start_idx += 1;
-            }
-
-            Some(cert.to_owned())
-        } else {
-            let rest = &chain[start_idx..];
-            start_idx += rest.len();
-            Some(rest.to_owned())
-        }
-    })
 }
