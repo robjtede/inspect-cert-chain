@@ -6,21 +6,23 @@ header = """
 body = """
 {% if version %}\
     ## {{ version | trim_start_matches(pat="v") }}
+
 {% else %}\
     ## Unreleased
+
 {% endif %}\
-{% for group, commits in commits | filter(attribute="group", value="Features") | group_by(attribute="group") %}
+{% for group, commits in commits | filter(attribute="group", value="Features") | group_by(attribute="group") %}\
     ### {{ group | upper_first }}
     {% for commit in commits %}
         - {{ commit.message | upper_first }}\
-    {% endfor %}\
-{% endfor %}\n
+    {% endfor %}\n
+{% endfor %}\
 {% for group, commits in commits | filter(attribute="group", value="Fixes") | group_by(attribute="group") %}\
     ### {{ group | upper_first }}
     {% for commit in commits %}
         - {{ commit.message | upper_first }}\
-    {% endfor %}\
-{% endfor %}\n
+    {% endfor %}\n
+{% endfor %}\
 """
 trim = true
 
@@ -32,4 +34,4 @@ commit_parsers = [
   { message = "^fix", group = "Fixes" },
   { message = "^docs", group = "Documentation", skip = true },
 ]
-filter_commits = true
+# filter_commits = true
