@@ -288,6 +288,7 @@ dependencies = [
  "der",
  "hex",
  "itertools",
+ "log",
  "memchr",
  "pkcs1",
  "rustls",

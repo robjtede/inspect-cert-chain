@@ -1,4 +1,3 @@
-#![allow(unused)]
 #![deny(rust_2018_idioms, future_incompatible)]
 
 use std::{
@@ -12,7 +11,7 @@ use const_oid::{
     db::rfc5912::{ID_EC_PUBLIC_KEY, RSA_ENCRYPTION},
     ObjectIdentifier,
 };
-use der::{Decode as _, DecodePem};
+use der::Decode as _;
 use itertools::Itertools as _;
 use memchr::memmem;
 use x509_cert::Certificate;
@@ -40,7 +39,8 @@ fn main() {
     } else if let Some(file) = args.file {
         let mut input = if file == "-" {
             let mut buf = String::new();
-            let stdin = io::stdin().read_to_string(&mut buf).unwrap();
+            let n_bytes = io::stdin().read_to_string(&mut buf).unwrap();
+            log::trace!("read {n_bytes} from stdin");
             Box::new(io::Cursor::new(buf)) as Box<dyn io::BufRead>
         } else {
             let file = fs::File::open(file).unwrap();
