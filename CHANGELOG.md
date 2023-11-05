@@ -4,9 +4,8 @@
 
 ### Features
 
-- Add support for local files and stdin
-- Nixify repo
+- Add support for local files and stdin.
 
 ### Fixes
 
-- Print serial number
+- Print serial number correctly.

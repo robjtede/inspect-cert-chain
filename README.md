@@ -4,8 +4,22 @@
 
 # Usage
 
+From remote host:
+
 ```console
-cargo run -- <hostname>
+inspect-cert-chain --host <hostname>
+```
+
+From chain file:
+
+```console
+inspect-cert-chain --file <path>
+```
+
+From stdin:
+
+```console
+cat <path> | inspect-cert-chain --file -
 ```
 
 # Roadmap
@@ -13,5 +27,5 @@ cargo run -- <hostname>
 - [x] OpenSSL-like text info
 - [x] fetch certificate from URL
 - [x] interpret more standard X.509 extensions
-- [ ] option to read local chain files
+- [x] option to read local chain files
 - [ ] determine chain validity
