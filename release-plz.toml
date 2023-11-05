@@ -1,0 +1,3 @@
+[workspace]
+changelog_config = ".git-cliff.toml"
+dependencies_update = false
