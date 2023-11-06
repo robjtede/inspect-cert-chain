@@ -1,0 +1,69 @@
+name: CD
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_GIT_FETCH_WITH_CLI: true
+  CARGO_NET_RETRY: 10
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  RUSTFLAGS: -D warnings
+  RUSTUP_MAX_RETRIES: 10
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  upload-assets:
+    strategy:
+      matrix:
+        include:
+          - { os: ubuntu-22.04, target: aarch64-unknown-linux-gnu }
+          - { os: ubuntu-22.04, target: aarch64-unknown-linux-musl }
+          - { os: macos-12, target: aarch64-apple-darwin }
+          - { os: windows-2022, target: aarch64-pc-windows-msvc }
+          - { os: ubuntu-22.04, target: x86_64-unknown-linux-gnu }
+          - { os: ubuntu-22.04, target: x86_64-unknown-linux-musl }
+          - { os: macos-12, target: x86_64-apple-darwin }
+          - { os: windows-2022, target: x86_64-pc-windows-msvc }
+          - { os: ubuntu-22.04, target: x86_64-unknown-freebsd }
+          - { os: macos-12, target: universal-apple-darwin }
+
+    name: Deploy (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    if: github.repository_owner == 'robjtede' && startsWith(github.event.release.name, 'v')
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1.5.0
+
+      - if: startsWith(matrix.os, 'ubuntu') && !contains(matrix.target, '-musl')
+        uses: taiki-e/setup-cross-toolchain-action@v1.18.0
+        with:
+          target: ${{ matrix.target }}
+
+      - if: contains(matrix.target, '-musl')
+        uses: taiki-e/install-action@v2.21.7
+        with:
+          tool: cross
+
+      - if: endsWith(matrix.target, 'windows-msvc')
+        run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static" >> "${GITHUB_ENV}"
+
+      - uses: taiki-e/upload-rust-binary-action@v1.17.1
+        with:
+          bin: my-bin
+          target: ${{ matrix.target }}
+          tar: all
+          zip: windows
+          token: ${{ secrets.GITHUB_TOKEN }}
