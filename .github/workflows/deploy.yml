@@ -26,19 +26,19 @@ jobs:
       matrix:
         include:
           - { os: ubuntu-22.04, target: aarch64-unknown-linux-gnu }
-          - { os: ubuntu-22.04, target: aarch64-unknown-linux-musl }
-          - { os: macos-12, target: aarch64-apple-darwin }
-          - { os: windows-2022, target: aarch64-pc-windows-msvc }
-          - { os: ubuntu-22.04, target: x86_64-unknown-linux-gnu }
-          - { os: ubuntu-22.04, target: x86_64-unknown-linux-musl }
-          - { os: macos-12, target: x86_64-apple-darwin }
-          - { os: windows-2022, target: x86_64-pc-windows-msvc }
-          - { os: ubuntu-22.04, target: x86_64-unknown-freebsd }
+          # - { os: ubuntu-22.04, target: aarch64-unknown-linux-musl }
+          # - { os: macos-12, target: aarch64-apple-darwin }
+          # - { os: windows-2022, target: aarch64-pc-windows-msvc }
+          # - { os: ubuntu-22.04, target: x86_64-unknown-linux-gnu }
+          # - { os: ubuntu-22.04, target: x86_64-unknown-linux-musl }
+          # - { os: macos-12, target: x86_64-apple-darwin }
+          # - { os: windows-2022, target: x86_64-pc-windows-msvc }
+          # - { os: ubuntu-22.04, target: x86_64-unknown-freebsd }
           - { os: macos-12, target: universal-apple-darwin }
 
     name: Deploy (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
-    if: github.repository_owner == 'robjtede' && startsWith(github.event.release.name, 'v')
+    # if: github.repository_owner == 'robjtede' && startsWith(github.event.release.name, 'v')
     timeout-minutes: 60
 
     steps:
@@ -62,7 +62,7 @@ jobs:
 
       - uses: taiki-e/upload-rust-binary-action@v1.17.1
         with:
-          bin: my-bin
+          bin: inspect-cert-chain
           target: ${{ matrix.target }}
           tar: all
           zip: windows
