@@ -1,12 +1,15 @@
 name: Release
 
 on:
-  push:
-    branches: [main]
+  push: { branches: [main] }
 
 permissions:
   contents: write
   pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   release:
