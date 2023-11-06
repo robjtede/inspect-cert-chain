@@ -1,3 +1,4 @@
 [workspace]
 changelog_config = ".git-cliff.toml"
 dependencies_update = false
+git_release_draft = true
