@@ -278,7 +278,7 @@ dependencies = [
 
 [[package]]
 name = "inspect-cert-chain"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "byteorder",
  "chrono",
