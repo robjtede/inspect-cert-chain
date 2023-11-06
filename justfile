@@ -36,6 +36,7 @@ check:
     npx -y prettier --check '**/*.{md,yml}'
     taplo lint
     cargo +nightly fmt -- --check
+    cargo clippy --workspace --all-targets -- -D warnings
 
 # Format project.
 fmt:
