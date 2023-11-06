@@ -20,6 +20,7 @@ mod fetch;
 mod util;
 
 #[derive(Debug, Parser)]
+#[command(author, version, about, long_about = None)]
 struct Args {
     #[clap(long, conflicts_with = "file")]
     host: Option<String>,
