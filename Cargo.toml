@@ -1,6 +1,6 @@
 [package]
 name = "inspect-cert-chain"
-version = "0.0.2"
+version = "0.0.3"
 description = "OpenSSL-like text output for debugging certificate chains"
 keywords = ["inspect", "cert", "chain", "openssl", "x509"]
 repository = "https://github.com/robjtede/inspect-cert-chain"
