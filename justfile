@@ -18,7 +18,6 @@ clippy-fix *args:
 
 # Test workspace.
 test:
-    cargo test --workspace --no-default-features
     cargo test --workspace --all-features
 
 # Document workspace.

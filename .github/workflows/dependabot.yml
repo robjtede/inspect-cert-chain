@@ -3,12 +3,8 @@ name: Dependabot
 on: pull_request_target
 
 permissions:
-  pull-requests: write
   contents: write
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  pull-requests: write
 
 jobs:
   review-dependabot-pr:
