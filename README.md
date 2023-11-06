@@ -2,6 +2,12 @@
 
 > OpenSSL-like text output for debugging certificate chains.
 
+# Installation
+
+```console
+$ cargo install inspect-cert-chain
+```
+
 # Usage
 
 From remote host:
@@ -24,8 +30,9 @@ cat <path> | inspect-cert-chain --file -
 
 # Roadmap
 
-- [x] OpenSSL-like text info
-- [x] fetch certificate from URL
-- [x] interpret more standard X.509 extensions
-- [x] option to read local chain files
-- [ ] determine chain validity
+- [x] OpenSSL-like text info.
+- [x] Fetch certificate chain from remote host.
+- [x] Read certificate chain from file and stdin.
+- [x] Interpret standard X.509 extensions.
+- [x] Option to read local chain files.
+- [ ] Determine chain validity.
