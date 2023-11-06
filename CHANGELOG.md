@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.3
+
+- No significant changes.
+
 ## 0.0.2
 
 ### Features
