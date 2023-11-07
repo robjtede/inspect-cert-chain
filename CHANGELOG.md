@@ -2,14 +2,11 @@
 
 ## 0.0.10
 
-### Features
-
-- Improve error reporting
-
 ### Fixes
 
-- Improve errors when connecting fails
-- Prevent exiting too early on EoF errors
+- Improve errors when connecting to remote host fails.
+- Improve errors when reading from remote host fails.
+- Prevent exiting too early on EoF errors.
 
 ## 0.0.9
 
