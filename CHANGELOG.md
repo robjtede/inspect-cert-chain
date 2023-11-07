@@ -2,6 +2,8 @@
 
 ## 0.0.9
 
+- No significant changes.
+
 ## 0.0.8
 
 - Build binaries for Linux x86.
