@@ -4,7 +4,7 @@
 
 ### Features
 
-- Add --version flag
+- Add `--version` flag.
 
 ## 0.0.6
 
