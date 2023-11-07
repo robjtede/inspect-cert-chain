@@ -31,16 +31,19 @@ struct Args {
 
 // let anchor = &TLS_SERVER_ROOTS.0[3]; // seems to have wrong modulus ?!?
 
-fn main() {
+fn main() -> eyre::Result<()> {
+    color_eyre::install()?;
+    env_logger::try_init()?;
+
     let args = Args::parse();
 
     let certs = if let Some(host) = &args.host {
-        fetch::cert_chain(host)
+        fetch::cert_chain(host)?
     } else if let Some(file) = args.file {
         let mut input = if file == "-" {
             let mut buf = String::new();
             let n_bytes = io::stdin().read_to_string(&mut buf).unwrap();
-            log::trace!("read {n_bytes} from stdin");
+            tracing::trace!("read {n_bytes} from stdin");
             Box::new(io::Cursor::new(buf)) as Box<dyn io::BufRead>
         } else {
             let file = fs::File::open(file).unwrap();
@@ -54,7 +57,7 @@ fn main() {
             .collect()
     } else {
         eprintln!("use --host or --file");
-        return;
+        return Ok(());
     };
 
     for cert in certs.into_iter() {
@@ -63,6 +66,8 @@ fn main() {
         println!();
         println!();
     }
+
+    Ok(())
 }
 
 fn print_cert_info(cert: &Certificate) {
