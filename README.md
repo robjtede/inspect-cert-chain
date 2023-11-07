@@ -4,6 +4,14 @@
 
 # Installation
 
+With [`cargo-binstall`]:
+
+```console
+$ cargo binstall inspect-cert-chain
+```
+
+From source:
+
 ```console
 $ cargo install inspect-cert-chain
 ```
@@ -36,3 +44,5 @@ cat <path> | inspect-cert-chain --file -
 - [x] Interpret standard X.509 extensions.
 - [x] Option to read local chain files.
 - [ ] Determine chain validity.
+
+[`cargo-binstall`]: https://github.com/cargo-bins/cargo-binstall
