@@ -47,6 +47,8 @@ jobs:
 
       - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1.5.0
+        with:
+          cache: false
 
       - if: startsWith(matrix.os, 'ubuntu') && !contains(matrix.target, '-musl')
         uses: taiki-e/setup-cross-toolchain-action@v1.18.0
@@ -61,7 +63,8 @@ jobs:
       - if: endsWith(matrix.target, 'windows-msvc')
         run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static" >> "${GITHUB_ENV}"
 
-      - uses: taiki-e/upload-rust-binary-action@v1.17.1
+      - name: Build and upload to release
+        uses: taiki-e/upload-rust-binary-action@v1.17.1
         with:
           bin: inspect-cert-chain
           target: ${{ matrix.target }}
