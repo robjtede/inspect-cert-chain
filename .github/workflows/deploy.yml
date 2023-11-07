@@ -39,7 +39,7 @@ jobs:
 
     name: Deploy (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
-    # if: github.repository_owner == 'robjtede' && startsWith(github.event.release.name, 'v')
+    if: github.repository_owner == 'robjtede' && startsWith(github.event.release.name, 'v')
     timeout-minutes: 60
 
     steps:
@@ -50,12 +50,12 @@ jobs:
         with:
           cache: false
 
-      - if: startsWith(matrix.os, 'ubuntu') && !contains(matrix.target, '-musl')
+      - if: startsWith(matrix.os, 'ubuntu') && !endsWith(matrix.target, '-musl')
         uses: taiki-e/setup-cross-toolchain-action@v1.18.0
         with:
           target: ${{ matrix.target }}
 
-      - if: contains(matrix.target, '-musl')
+      - if: endsWith(matrix.target, '-musl')
         uses: taiki-e/install-action@v2.21.7
         with:
           tool: cross
