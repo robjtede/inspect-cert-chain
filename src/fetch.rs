@@ -11,6 +11,9 @@ use rustls::{client::ServerCertVerifier, OwnedTrustAnchor, RootCertStore, Server
 use x509_cert::Certificate;
 
 pub(crate) fn cert_chain(host: &str) -> eyre::Result<Vec<Certificate>> {
+    let server_name = ServerName::try_from(host)
+        .with_context(|| format!("failed to convert given host (\"{host}\") to server name"))?;
+
     let mut root_store = RootCertStore::empty();
 
     root_store.add_trust_anchors(webpki_roots::TLS_SERVER_ROOTS.iter().map(|ta| {
@@ -32,10 +35,9 @@ pub(crate) fn cert_chain(host: &str) -> eyre::Result<Vec<Certificate>> {
         .dangerous()
         .set_certificate_verifier(Arc::new(NoopServerCertVerifier));
 
-    let server_name = ServerName::try_from(host)?;
-
     let mut conn = rustls::ClientConnection::new(Arc::new(config), server_name)?;
-    let mut sock = TcpStream::connect(format!("{host}:443"))?;
+    let mut sock = TcpStream::connect(format!("{host}:443"))
+        .wrap_err_with(|| format!("failed to connect to host: {host}:443"))?;
     let mut tls = rustls::Stream::new(&mut conn, &mut sock);
 
     let req = format!(
