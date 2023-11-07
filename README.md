@@ -2,7 +2,7 @@
 
 > OpenSSL-like text output for debugging certificate chains.
 
-# Installation
+# Install
 
 With [`cargo-binstall`]:
 

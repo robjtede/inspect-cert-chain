@@ -17,11 +17,11 @@ color-eyre = "0.6"
 const-oid = { version = "0.9", features = ["std", "db"] }
 ct-sct = "0.1"
 der = { version = "0.7", features = ["std"] }
-env_logger = "0.10"
 error_reporter = "1"
 eyre = "0.6"
 itertools = "0.11"
 pkcs1 = { version = "0.7", features = ["std"] }
+pretty_env_logger = "0.5"
 rustls = { version = "0.21", features = ["dangerous_configuration"] }
 rustls-pemfile = "1"
 tracing = { version = "0.1.30", features = ["log", "release_max_level_debug"] }

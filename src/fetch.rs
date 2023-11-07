@@ -6,7 +6,7 @@ use std::{
 
 use der::Decode;
 use error_reporter::Report;
-use eyre::WrapErr;
+use eyre::WrapErr as _;
 use rustls::{client::ServerCertVerifier, OwnedTrustAnchor, RootCertStore, ServerName};
 use x509_cert::Certificate;
 

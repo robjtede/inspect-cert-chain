@@ -416,11 +416,11 @@ dependencies = [
  "const-oid",
  "ct-sct",
  "der",
- "env_logger",
  "error_reporter",
  "eyre",
  "itertools",
  "pkcs1",
+ "pretty_env_logger",
  "rustls",
  "rustls-pemfile",
  "tracing",
@@ -560,6 +560,16 @@ checksum = "f950b2377845cebe5cf8b5165cb3cc1a5e0fa5cfa3e1f7f55707d8fd82e0a7b7"
 dependencies = [
  "der",
  "spki",
+]
+
+[[package]]
+name = "pretty_env_logger"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "865724d4dbe39d9f3dd3b52b88d859d66bcb2d6a0acfd5ea68a65fb66d4bdc1c"
+dependencies = [
+ "env_logger",
+ "log",
 ]
 
 [[package]]
