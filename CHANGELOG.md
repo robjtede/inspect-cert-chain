@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.10
+
+### Features
+
+- Improve error reporting
+
+### Fixes
+
+- Improve errors when connecting fails
+- Prevent exiting too early on EoF errors
+
 ## 0.0.9
 
 - No significant changes.
