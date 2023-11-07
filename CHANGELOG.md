@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.8
+
+- Build binaries for Linux x86.
+- Build binaries for Windows.
+- Build non-universal binaries for macOS.
+
 ## 0.0.7
 
 ### Features
