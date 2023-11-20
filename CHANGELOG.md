@@ -4,12 +4,12 @@
 
 ### Features
 
-- Add verbose `-v` flag
-- Add `--dump` argument
+- Add verbose `-v` flag.
+- Add `--dump` argument.
 
 ### Fixes
 
-- Improve errors when reading from file fails
+- Improve errors when reading from file fails.
 
 ## 0.0.10
 
