@@ -38,15 +38,24 @@ struct Args {
     /// Inspect a local certificate chain in PEM format.
     #[clap(long, conflicts_with = "host")]
     file: Option<camino::Utf8PathBuf>,
+
+    #[arg(short, long, action = clap::ArgAction::Count)]
+    verbose: u8,
 }
 
 // let anchor = &TLS_SERVER_ROOTS.0[3]; // seems to have wrong modulus ?!?
 
 fn main() -> eyre::Result<()> {
     color_eyre::install()?;
-    pretty_env_logger::try_init_timed()?;
 
     let args = Args::parse();
+
+    if args.verbose == 0 {
+        pretty_env_logger::try_init_timed()?;
+    } else {
+        std::env::set_var("RUST_LOG", "info");
+        pretty_env_logger::try_init_timed()?;
+    }
 
     let certs = if let Some(host) = &args.host {
         tracing::info!("fetching certificate chain from remote host: {host}");
