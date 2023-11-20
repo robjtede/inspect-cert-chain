@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.11
+
+### Features
+
+- Add verbose `-v` flag.
+- Add `--dump` argument.
+
+### Fixes
+
+- Improve errors when reading from file fails.
+
 ## 0.0.10
 
 ### Fixes
