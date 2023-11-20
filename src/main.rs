@@ -6,22 +6,38 @@ use std::{
 };
 
 use clap::Parser;
-use der::Decode as _;
+use der::{Decode as _, Encode as _};
 use eyre::WrapErr as _;
+use pem_rfc7468::{LineEnding, PemLabel as _};
+use x509_cert::Certificate;
 
 mod ext;
 mod fetch;
 mod info;
 mod util;
 
+cfg_if::cfg_if! {
+    if #[cfg(windows)] {
+        const LINE_ENDING: LineEnding = LineEnding::CRLF;
+    } else {
+        const LINE_ENDING: LineEnding = LineEnding::LF;
+    }
+}
+
 #[derive(Debug, Parser)]
 #[command(author, version, about, long_about = None)]
 struct Args {
+    /// Download certificate chain from remote host.
     #[clap(long, conflicts_with = "file")]
     host: Option<String>,
 
+    /// When provided, writes downloaded chain to file in PEM format.
+    #[clap(long, conflicts_with = "file")]
+    dump: Option<camino::Utf8PathBuf>,
+
+    /// Inspect a local certificate chain in PEM format.
     #[clap(long, conflicts_with = "host")]
-    file: Option<String>,
+    file: Option<camino::Utf8PathBuf>,
 }
 
 // let anchor = &TLS_SERVER_ROOTS.0[3]; // seems to have wrong modulus ?!?
@@ -70,11 +86,31 @@ fn main() -> eyre::Result<()> {
         return Err(eyre::eyre!("chain contained 0 certificates"));
     }
 
-    for cert in certs.into_iter() {
-        info::print_cert_info(&cert);
+    for cert in &certs {
+        info::print_cert_info(cert);
 
         println!();
         println!();
+    }
+
+    if let Some(dump_path) = args.dump {
+        tracing::info!("writing chain to {dump_path}");
+
+        let pem_chain = certs
+            .into_iter()
+            .map(|cert| {
+                let mut der = Vec::with_capacity(256);
+                cert.encode_to_vec(&mut der)
+                    .wrap_err("failed to convert certificate back to DER encoding")?;
+
+                pem_rfc7468::encode_string(Certificate::PEM_LABEL, LINE_ENDING, &der)
+                    .wrap_err("failed to encode DER certificate to PEM format")
+            })
+            .collect::<Result<Vec<_>, _>>()?
+            .concat();
+
+        fs::write(&dump_path, pem_chain)
+            .wrap_err_with(|| format!("failed to dump downloaded cert chain to {dump_path}"))?;
     }
 
     Ok(())

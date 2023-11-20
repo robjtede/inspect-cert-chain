@@ -11,7 +11,9 @@ rust-version = "1.68"
 
 [dependencies]
 byteorder = "1"
-chrono = { version = "0.4.31", features = ["serde"] }
+camino = "1"
+cfg-if = "1"
+chrono = "0.4.31"
 clap = { version = "4", features = ["derive"] }
 color-eyre = "0.6"
 const-oid = { version = "0.9", features = ["std", "db"] }
@@ -19,7 +21,8 @@ ct-sct = "0.1"
 der = { version = "0.7", features = ["std"] }
 error_reporter = "1"
 eyre = "0.6"
-itertools = "0.11"
+itertools = "0.12"
+pem-rfc7468 = { version = "0.7", features = ["std"] }
 pkcs1 = { version = "0.7", features = ["std"] }
 pretty_env_logger = "0.5"
 rustls = { version = "0.21", features = ["dangerous_configuration"] }
