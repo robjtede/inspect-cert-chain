@@ -7,29 +7,22 @@ use std::{
 use der::Decode;
 use error_reporter::Report;
 use eyre::WrapErr as _;
-use rustls::{client::ServerCertVerifier, OwnedTrustAnchor, RootCertStore, ServerName};
+use rustls::RootCertStore;
+use rustls_pki_types::ServerName;
 use x509_cert::Certificate;
 
 pub(crate) fn cert_chain(host: &str) -> eyre::Result<Vec<Certificate>> {
     let server_name = ServerName::try_from(host)
-        .with_context(|| format!("failed to convert given host (\"{host}\") to server name"))?;
+        .with_context(|| format!("failed to convert given host (\"{host}\") to server name"))?
+        .to_owned();
 
     let mut root_store = RootCertStore::empty();
+    root_store.extend(webpki_roots::TLS_SERVER_ROOTS.to_owned());
 
-    root_store.add_trust_anchors(webpki_roots::TLS_SERVER_ROOTS.iter().map(|ta| {
-        OwnedTrustAnchor::from_subject_spki_name_constraints(
-            ta.subject,
-            ta.spki,
-            ta.name_constraints,
-        )
-    }));
-
-    let mut config = rustls::ClientConfig::builder()
-        .with_safe_default_cipher_suites()
-        .with_safe_default_kx_groups()
-        .with_protocol_versions(&[&rustls::version::TLS12])?
-        .with_root_certificates(root_store)
-        .with_no_client_auth();
+    let mut config =
+        rustls::ClientConfig::builder_with_protocol_versions(&[&rustls::version::TLS12])
+            .with_root_certificates(root_store)
+            .with_no_client_auth();
 
     config
         .dangerous()
@@ -73,24 +66,48 @@ Accept-Encoding: identity
         .peer_certificates()
         .map(|c| {
             c.iter()
-                .filter_map(|c| Certificate::from_der(&c.0).ok())
+                .filter_map(|c| Certificate::from_der(c).ok())
                 .collect()
         })
         .unwrap_or_default())
 }
 
+#[derive(Debug)]
 struct NoopServerCertVerifier;
 
-impl ServerCertVerifier for NoopServerCertVerifier {
+impl rustls::client::danger::ServerCertVerifier for NoopServerCertVerifier {
     fn verify_server_cert(
         &self,
-        _end_entity: &rustls::Certificate,
-        _intermediates: &[rustls::Certificate],
-        _server_name: &ServerName,
-        _scts: &mut dyn Iterator<Item = &[u8]>,
+        _end_entity: &rustls_pki_types::CertificateDer<'_>,
+        _intermediates: &[rustls_pki_types::CertificateDer<'_>],
+        _server_name: &ServerName<'_>,
         _ocsp_response: &[u8],
-        _now: std::time::SystemTime,
-    ) -> Result<rustls::client::ServerCertVerified, rustls::Error> {
-        Ok(rustls::client::ServerCertVerified::assertion())
+        _now: rustls_pki_types::UnixTime,
+    ) -> Result<rustls::client::danger::ServerCertVerified, rustls::Error> {
+        Ok(rustls::client::danger::ServerCertVerified::assertion())
+    }
+
+    fn verify_tls12_signature(
+        &self,
+        _message: &[u8],
+        _cert: &rustls_pki_types::CertificateDer<'_>,
+        _dss: &rustls::DigitallySignedStruct,
+    ) -> Result<rustls::client::danger::HandshakeSignatureValid, rustls::Error> {
+        Ok(rustls::client::danger::HandshakeSignatureValid::assertion())
+    }
+
+    fn verify_tls13_signature(
+        &self,
+        _message: &[u8],
+        _cert: &rustls_pki_types::CertificateDer<'_>,
+        _dss: &rustls::DigitallySignedStruct,
+    ) -> Result<rustls::client::danger::HandshakeSignatureValid, rustls::Error> {
+        Ok(rustls::client::danger::HandshakeSignatureValid::assertion())
+    }
+
+    fn supported_verify_schemes(&self) -> Vec<rustls::SignatureScheme> {
+        rustls::crypto::ring::default_provider()
+            .signature_verification_algorithms
+            .supported_schemes()
     }
 }

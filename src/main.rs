@@ -77,7 +77,7 @@ fn main() -> eyre::Result<()> {
         };
 
         tracing::debug!("reading certificate chain PEM files");
-        let certs = rustls_pemfile::certs(&mut input)?;
+        let certs = rustls_pemfile::certs(&mut input).collect::<Result<Vec<_>, _>>()?;
 
         tracing::debug!("parsing certificate chain");
         certs
