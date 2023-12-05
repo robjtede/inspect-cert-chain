@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.12
+
+### Features
+
+- Update rustls dependency to v0.22
+
 ## 0.0.11
 
 ### Features
