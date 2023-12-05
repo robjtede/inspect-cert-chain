@@ -4,7 +4,7 @@
 
 ### Features
 
-- Update rustls dependency to v0.22
+- Update `rustls` dependency to `0.22`.
 
 ## 0.0.11
 
