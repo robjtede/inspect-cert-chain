@@ -56,7 +56,7 @@ jobs:
           target: ${{ matrix.target }}
 
       - if: endsWith(matrix.target, '-musl')
-        uses: taiki-e/install-action@v2.22.0
+        uses: taiki-e/install-action@v2.22.5
         with:
           tool: cross
 
