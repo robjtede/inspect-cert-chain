@@ -30,3 +30,7 @@ rustls-pki-types = "1"
 tracing = { version = "0.1.30", features = ["log", "release_max_level_debug"] }
 webpki-roots = "0.26"
 x509-cert = { version = "0.2.5", features = ["sct"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
