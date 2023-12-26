@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Use readable format for SCT timestamps
+- Use readable format for SCT timestamps.
 
 ## 0.0.13
 
