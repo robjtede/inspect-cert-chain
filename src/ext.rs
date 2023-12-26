@@ -185,7 +185,7 @@ fn fmt_sct(sct: sct::SignedCertificateTimestamp) -> String {
         "Signed Certificate Timestamp:\n      Version   : {:?}\n      Log ID    : {}\n      Timestamp : {}\n      Extensions: {}\n      Signature : {}\n                  {}",
         sct.version,
         openssl_hex(&sct.log_id.key_id, 16).join("\n                  "),
-        sct.timestamp,
+        sct.timestamp().expect("SCT timestamp is outside supported range"),
         if extensions.is_empty() {
             "none"
         } else {
