@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.14
+
+### Fixes
+
+- Use readable format for SCT timestamps
+
 ## 0.0.13
 
 - No significant changes.
