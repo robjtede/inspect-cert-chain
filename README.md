@@ -1,4 +1,4 @@
-# inspect-cert-chain
+# `inspect-cert-chain`
 
 > OpenSSL-like text output for debugging certificate chains.
 
