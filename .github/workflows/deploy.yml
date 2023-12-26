@@ -13,7 +13,6 @@ env:
   CARGO_NET_RETRY: 10
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
-  RUSTFLAGS: -D warnings
   RUSTUP_MAX_RETRIES: 10
 
 defaults:
@@ -26,16 +25,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: macos-12, target: aarch64-apple-darwin }
-          - { os: macos-12, target: universal-apple-darwin }
-          - { os: macos-12, target: x86_64-apple-darwin }
-          - { os: ubuntu-22.04, target: aarch64-unknown-linux-gnu }
-          - { os: ubuntu-22.04, target: aarch64-unknown-linux-musl }
-          - { os: ubuntu-22.04, target: x86_64-unknown-freebsd }
-          - { os: ubuntu-22.04, target: x86_64-unknown-linux-gnu }
-          - { os: ubuntu-22.04, target: x86_64-unknown-linux-musl }
-          # - { os: windows-2022, target: aarch64-pc-windows-msvc } # ring not supported
-          - { os: windows-2022, target: x86_64-pc-windows-msvc }
+          - { os: macos-latest, target: aarch64-apple-darwin }
+          - { os: macos-latest, target: universal-apple-darwin }
+          - { os: macos-latest, target: x86_64-apple-darwin }
+          - { os: ubuntu-latest, target: aarch64-unknown-linux-gnu }
+          - { os: ubuntu-latest, target: aarch64-unknown-linux-musl }
+          - { os: ubuntu-latest, target: x86_64-unknown-freebsd }
+          - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu }
+          - { os: ubuntu-latest, target: x86_64-unknown-linux-musl }
+          # - { os: windows-latest, target: aarch64-pc-windows-msvc } # ring not supported
+          - { os: windows-latest, target: x86_64-pc-windows-msvc }
 
     name: Deploy (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
@@ -50,18 +49,21 @@ jobs:
         with:
           cache: false
 
-      - if: startsWith(matrix.os, 'ubuntu') && !endsWith(matrix.target, '-musl')
-        uses: taiki-e/setup-cross-toolchain-action@v1.18.0
+      # TODO: see if this is needed after next deploy
+      # - if: startsWith(matrix.os, 'ubuntu') && !endsWith(matrix.target, '-musl')
+      - uses: taiki-e/setup-cross-toolchain-action@v1.18.0
         with:
           target: ${{ matrix.target }}
 
-      - if: endsWith(matrix.target, '-musl')
-        uses: taiki-e/install-action@v2.23.1
-        with:
-          tool: cross
+      # TODO: see if this is needed after next deploy
+      # - if: endsWith(matrix.target, '-musl')
+      #   uses: taiki-e/install-action@v2.23.1
+      #   with:
+      #     tool: cross
 
-      - if: endsWith(matrix.target, 'windows-msvc')
-        run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static" >> "${GITHUB_ENV}"
+      # TODO: see if this is needed after next deploy
+      # - if: endsWith(matrix.target, 'windows-msvc')
+      #   run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static" >> "${GITHUB_ENV}"
 
       - name: Build and upload to release
         uses: taiki-e/upload-rust-binary-action@v1.18.0
