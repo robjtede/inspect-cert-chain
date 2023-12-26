@@ -9,6 +9,7 @@
         "memmem",
         "ocsp",
         "pemfile",
+        "pkix",
         "rustls",
         "scts",
         "spki",

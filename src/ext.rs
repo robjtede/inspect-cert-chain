@@ -1,11 +1,10 @@
 use std::{borrow::Cow, net::IpAddr};
 
 use const_oid::AssociatedOid as _;
-use ct_sct::sct;
 use der::Decode;
 use itertools::Itertools;
 use x509_cert::ext::{
-    pkix::{self, crl::dp, name::GeneralName, AuthorityKeyIdentifier},
+    pkix::{self, crl::dp, name::GeneralName, sct, AuthorityKeyIdentifier},
     Extension,
 };
 
@@ -22,7 +21,7 @@ pub(crate) fn interpret_val(ext: &Extension) -> String {
         pkix::ExtendedKeyUsage::OID => fmt_extended_key_usage(ext),
         pkix::AuthorityKeyIdentifier::OID => fmt_authority_key_identifier(ext),
         pkix::CrlDistributionPoints::OID => fmt_crl_distribution_points(ext),
-        sct::SctList::OID => fmt_sct_list(ext),
+        sct::SignedCertificateTimestampList::OID => fmt_sct_list(ext),
         _ => openssl_hex(ext.extn_value.as_bytes(), 80).join("\n    "),
     }
 }
@@ -166,22 +165,42 @@ fn fmt_reason(reason: dp::Reasons) -> &'static str {
 }
 
 fn fmt_sct_list(ext: &Extension) -> String {
-    let sct_list = sct::SctList::from_der(ext.extn_value.as_bytes()).unwrap();
-    let list =
-        sct::TlsSctList::from_sct_list(&sct_list).expect("Failed to deserialize tls sct list");
-    list.scts.iter().map(fmt_sct).join("\n    ")
+    sct::SignedCertificateTimestampList::from_der(ext.extn_value.as_bytes())
+        .expect("Failed to deserialize SCT list")
+        .parse_timestamps()
+        .expect("Failed to parse SCT timestamps")
+        .into_iter()
+        .map(|ser_sct| {
+            ser_sct
+                .parse_timestamp()
+                .expect("Failed to deserialize SCT timestamp")
+        })
+        .map(fmt_sct)
+        .join("\n    ")
 }
 
-fn fmt_sct(sct: &sct::TlsSct) -> String {
-    let extensions = openssl_hex(&sct.extensions, 16).join("\n                  ");
+fn fmt_sct(sct: sct::SignedCertificateTimestamp) -> String {
+    let extensions = openssl_hex(sct.extensions.as_slice(), 16).join("\n                  ");
     format!(
-        "Signed Certificate Timestamp:\n      Version   : {}\n      Log ID    : {}\n      Timestamp : {}\n      Extensions: {}\n      Signature : {}\n                  {}",
+        "Signed Certificate Timestamp:\n      Version   : {:?}\n      Log ID    : {}\n      Timestamp : {}\n      Extensions: {}\n      Signature : {}\n                  {}",
         sct.version,
-        openssl_hex(&sct.log_id, 16).join("\n                  "),
+        openssl_hex(&sct.log_id.key_id, 16).join("\n                  "),
         sct.timestamp,
-        if extensions.is_empty() { "none" } else { &extensions },
-        sct.sign.sign_and_hash_algo,
-        openssl_hex(&sct.sign.sign, 16).join("\n                  "),
+        if extensions.is_empty() {
+            "none"
+        } else {
+            &extensions
+        },
+        fmt_signature_and_hash_alg(&sct.signature.algorithm),
+        openssl_hex(sct.signature.signature.as_slice(), 16).join("\n                  "),
+    )
+}
+
+fn fmt_signature_and_hash_alg(alg: &sct::SignatureAndHashAlgorithm) -> String {
+    format!(
+        "{}-with-{}",
+        format!("{:?}", alg.signature).to_ascii_uppercase(),
+        format!("{:?}", alg.hash).to_ascii_uppercase(),
     )
 }
 

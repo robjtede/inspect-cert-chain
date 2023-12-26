@@ -43,3 +43,11 @@ jobs:
 
       - name: Test
         run: just test
+
+      - name: Install cargo-ci-cache-clean
+        uses: taiki-e/install-action@v2.21.26
+        with:
+          tool: cargo-ci-cache-clean
+
+      - name: CI cache clean
+        run: cargo-ci-cache-clean
