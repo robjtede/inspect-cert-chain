@@ -24,7 +24,7 @@ itertools = "0.12"
 pem-rfc7468 = { version = "0.7", features = ["std"] }
 pkcs1 = { version = "0.7", features = ["std"] }
 pretty_env_logger = "0.5"
-rustls = "0.22"
+rustls = "0.23"
 rustls-pemfile = "2"
 rustls-pki-types = "1"
 tracing = { version = "0.1.30", features = ["log", "release_max_level_debug"] }
