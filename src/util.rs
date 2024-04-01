@@ -53,7 +53,7 @@ pub(crate) fn duration_since_now_fmt(time: x509_cert::time::Time) -> String {
 
     let ts = time.to_unix_duration().as_secs() as i64;
 
-    let date = Utc.from_utc_datetime(&chrono::NaiveDateTime::from_timestamp_opt(ts, 0).unwrap());
+    let date = DateTime::from_timestamp(ts, 0).unwrap();
     let now = Utc::now();
 
     let duration = if now > date { now - date } else { date - now };
