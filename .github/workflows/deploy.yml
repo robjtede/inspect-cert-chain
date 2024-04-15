@@ -51,7 +51,7 @@ jobs:
 
       # TODO: see if this is needed after next deploy
       # - if: startsWith(matrix.os, 'ubuntu') && !endsWith(matrix.target, '-musl')
-      - uses: taiki-e/setup-cross-toolchain-action@v1.20.0
+      - uses: taiki-e/setup-cross-toolchain-action@v1.21.0
         with:
           target: ${{ matrix.target }}
 
