@@ -18,23 +18,23 @@ clippy-fix *args:
 
 # Test workspace.
 test:
-    cargo test --workspace --all-features
+    cargo nextest run --workspace --all-features
 
 # Document workspace.
-doc:
-    RUSTDOCFLAGS="--cfg=docsrs" cargo +nightly doc --no-deps --workspace --all-features
+doc *args:
+    RUSTDOCFLAGS="--cfg=docsrs" cargo +nightly doc --no-deps --workspace --all-features {{ args }}
 
 # Document workspace and watch for changes.
-doc-watch:
-    RUSTDOCFLAGS="--cfg=docsrs" cargo +nightly doc --no-deps --workspace --all-features --open
+doc-watch: (doc "--open")
     cargo watch -- RUSTDOCFLAGS="--cfg=docsrs" cargo +nightly doc --no-deps --workspace --all-features
 
 # Check project formatting.
 check:
     just --unstable --fmt --check
     nixpkgs-fmt .
-    prettier --check $(fd --hidden --extension=md --extension=yml)
-    taplo lint $(fd --hidden --extension=toml)
+    fd --hidden --extension=md --extension=yml --exec-batch prettier --check
+    fd --hidden --extension=toml --exec-batch taplo format --check
+    fd --hidden --extension=toml --exec-batch taplo lint
     cargo +nightly fmt -- --check
     cargo clippy --workspace --all-targets -- -D warnings
 
@@ -42,6 +42,6 @@ check:
 fmt:
     just --unstable --fmt
     nixpkgs-fmt .
-    prettier --write $(fd --hidden --extension=md --extension=yml)
-    taplo format $(fd --hidden --extension=toml)
+    fd --hidden --extension=md --extension=yml --exec-batch prettier --write
+    fd --hidden --extension=toml --exec-batch taplo format
     cargo +nightly fmt
