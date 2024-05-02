@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.15
+
+### Features
+
+- Update rustls dependency to v0.23
+
 ## 0.0.14
 
 ### Fixes
