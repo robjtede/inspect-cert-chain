@@ -30,10 +30,10 @@ jobs:
           - { os: macos-latest, target: x86_64-apple-darwin }
           - { os: ubuntu-latest, target: aarch64-unknown-linux-gnu }
           - { os: ubuntu-latest, target: aarch64-unknown-linux-musl }
-          - { os: ubuntu-latest, target: x86_64-unknown-freebsd }
+          # - { os: ubuntu-latest, target: x86_64-unknown-freebsd } # not supported by aws-lc
           - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu }
           - { os: ubuntu-latest, target: x86_64-unknown-linux-musl }
-          # - { os: windows-latest, target: aarch64-pc-windows-msvc } # ring not supported
+          # - { os: windows-latest, target: aarch64-pc-windows-msvc } # not supported by aws-lc
           - { os: windows-latest, target: x86_64-pc-windows-msvc }
 
     name: Deploy (${{ matrix.target }})
@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install nasm
-        if: matrix.target.os == 'windojuws-latest'
+        if: matrix.target.os == 'windows-latest'
         uses: ilammy/setup-nasm@v1.5.1
 
       - name: Install Rust
