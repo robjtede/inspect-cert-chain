@@ -57,6 +57,10 @@ fn main() -> eyre::Result<()> {
         pretty_env_logger::try_init_timed()?;
     }
 
+    rustls::crypto::aws_lc_rs::default_provider()
+        .install_default()
+        .unwrap();
+
     let certs = if let Some(host) = &args.host {
         tracing::info!("fetching certificate chain from remote host: {host}");
         fetch::cert_chain(host)?
