@@ -32,14 +32,16 @@ doc-watch:
 # Check project formatting.
 check:
     just --unstable --fmt --check
-    npx -y prettier --check '**/*.{md,yml}'
-    taplo lint
+    nixpkgs-fmt .
+    prettier --check $(fd --hidden --extension=md --extension=yml)
+    taplo lint $(fd --hidden --extension=toml)
     cargo +nightly fmt -- --check
     cargo clippy --workspace --all-targets -- -D warnings
 
 # Format project.
 fmt:
     just --unstable --fmt
-    npx -y prettier --write '**/*.{md,yml}'
-    taplo format
+    nixpkgs-fmt .
+    prettier --write $(fd --hidden --extension=md --extension=yml)
+    taplo format $(fd --hidden --extension=toml)
     cargo +nightly fmt
