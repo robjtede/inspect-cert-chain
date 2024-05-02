@@ -2,9 +2,9 @@
 
 ## 0.0.15
 
-### Features
+### Changes
 
-- Update rustls dependency to v0.23
+- Update `rustls` dependency to v0.23.
 
 ## 0.0.14
 
