@@ -100,7 +100,7 @@ fn main() -> eyre::Result<()> {
     }
 
     for cert in &certs {
-        info::print_cert_info(cert);
+        info::print_cert_info(cert, &mut io::stdout())?;
 
         println!();
         println!();
