@@ -2,7 +2,7 @@
 
 use std::{
     fs,
-    io::{self, Read},
+    io::{self, Read as _, Write as _},
 };
 
 use clap::Parser;
@@ -14,6 +14,7 @@ use x509_cert::Certificate;
 mod ext;
 mod fetch;
 mod info;
+mod tui;
 mod util;
 
 cfg_if::cfg_if! {
@@ -38,6 +39,9 @@ struct Args {
     /// Inspect a local certificate chain in PEM format.
     #[clap(long, conflicts_with = "host")]
     file: Option<camino::Utf8PathBuf>,
+
+    #[arg(short, long)]
+    interactive: bool,
 
     #[arg(short, long, action = clap::ArgAction::Count)]
     verbose: u8,
@@ -99,11 +103,20 @@ fn main() -> eyre::Result<()> {
         return Err(eyre::eyre!("chain contained 0 certificates"));
     }
 
-    for cert in &certs {
-        info::print_cert_info(cert, &mut io::stdout())?;
+    if args.interactive {
+        let mut tui = tui::init()?;
+        let mut app = tui::App::new(&certs);
+        app.run(&mut tui)?;
+        tui::restore()?;
+    } else {
+        let mut stdout = io::stdout();
 
-        println!();
-        println!();
+        for cert in &certs {
+            info::write_cert_info(cert, &mut stdout)?;
+
+            writeln!(&mut stdout)?;
+            writeln!(&mut stdout)?;
+        }
     }
 
     if let Some(dump_path) = args.dump {
