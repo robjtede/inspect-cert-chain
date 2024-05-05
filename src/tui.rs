@@ -77,8 +77,8 @@ impl App {
             .border_set(border::THICK);
 
         let layout = Layout::vertical([
-            Constraint::Fill(1), // list
-            Constraint::Fill(4), // details
+            Constraint::Length(self.certs.len() as u16), // list
+            Constraint::Fill(1),                         // details
         ]);
 
         let outer_block_area = outer_block.inner(frame.size());
@@ -105,7 +105,9 @@ impl App {
         let details = Paragraph::new(
             String::from_utf8(details)
                 .expect("everything written to details buffer should be UTF-8"),
-        );
+        )
+        .scroll((2, 0)) // trim first two lines
+        .block(Block::default().borders(Borders::TOP));
 
         // rendering
 
