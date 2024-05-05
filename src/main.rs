@@ -124,21 +124,20 @@ fn main() -> eyre::Result<()> {
 
         let mut der_buf = Vec::with_capacity(256);
 
-        let pem_chain =
-            certs
-                .into_iter()
-                .try_fold(String::new(), |buf, cert| -> eyre::Result<_> {
-                    der_buf.clear();
+        let pem_chain = certs.into_iter().try_fold(
+            Vec::with_capacity(1_000_000),
+            |mut buf, cert| -> eyre::Result<_> {
+                der_buf.clear();
 
-                    cert.encode_to_vec(&mut der_buf)
-                        .wrap_err("failed to convert certificate back to DER encoding")?;
+                cert.encode_to_vec(&mut der_buf)
+                    .wrap_err("failed to convert certificate back to DER encoding")?;
 
-                    let pem =
-                        pem_rfc7468::encode_string(Certificate::PEM_LABEL, LINE_ENDING, &der_buf)
-                            .wrap_err("failed to determine PEM length")?;
+                pem_rfc7468::encode(Certificate::PEM_LABEL, LINE_ENDING, &der_buf, &mut buf)
+                    .wrap_err("failed to determine PEM length")?;
 
-                    Ok(buf + &pem)
-                })?;
+                Ok(buf)
+            },
+        )?;
 
         fs::write(&dump_path, pem_chain)
             .wrap_err_with(|| format!("failed to dump downloaded cert chain to {dump_path}"))?;
