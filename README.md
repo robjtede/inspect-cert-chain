@@ -1,6 +1,6 @@
 # `inspect-cert-chain`
 
-> OpenSSL-like text output for debugging certificate chains.
+> Inspect and debug TLS certificate chains (without OpenSSL)
 
 [![asciicast](https://asciinema.org/a/657965.svg)](https://asciinema.org/a/657965)
 
