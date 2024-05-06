@@ -10,7 +10,8 @@ use ratatui::{
     symbols::border,
     widgets::{
         block::{Block, Position, Title},
-        Borders, List, ListState, Paragraph,
+        Borders, List, ListState, Padding, Paragraph, Scrollbar, ScrollbarOrientation,
+        ScrollbarState,
     },
 };
 use x509_cert::Certificate;
@@ -35,8 +36,9 @@ pub(crate) fn restore() -> io::Result<()> {
 
 #[derive(Debug)]
 pub(crate) struct App {
-    certs: Vec<Certificate>,
+    certs: Vec<(Certificate, String, usize)>,
     list_state: ListState,
+    details_scroll: usize,
     exit: bool,
 }
 
@@ -46,7 +48,24 @@ impl App {
         Self {
             exit: false,
             list_state: ListState::default().with_selected(Some(0)),
-            certs: certs.to_owned(),
+            details_scroll: 2, // trim first two (useless) lines
+            certs: certs
+                .iter()
+                .cloned()
+                .map(|cert| {
+                    let mut details = Vec::with_capacity(4_096); // roughly ~4Kb of output
+
+                    write_cert_info(&cert, &mut details)
+                        .expect("io::Write-ing to a Vec always succeeds");
+
+                    let details = String::from_utf8(details)
+                        .expect("everything written to details buffer should be UTF-8");
+
+                    let lines = details.lines().count();
+
+                    (cert, details, lines)
+                })
+                .collect(),
         }
     }
 
@@ -61,10 +80,43 @@ impl App {
     }
 
     fn render_frame(&mut self, frame: &mut Frame<'_>) {
-        let title = Title::from("inspect-cert-chain".bold());
-        let instructions = Title::from(Line::from(vec![" Quit ".into(), "<Q> ".blue().bold()]));
-
         // layout
+
+        let (outer_block, list_area, details_area) = self.create_layout(frame);
+
+        // content
+
+        let list = self.create_list();
+        let (details, (scrollbar, mut scrollbar_state)) = self.create_details();
+
+        // rendering
+
+        let mut scrollbar_area = details_area;
+        // correct offset given top border
+        scrollbar_area.y += 1;
+        scrollbar_area.height -= 1;
+
+        frame.render_widget(outer_block, frame.size());
+        frame.render_stateful_widget(list, list_area, &mut self.list_state);
+        frame.render_widget(details, details_area);
+        frame.render_stateful_widget(scrollbar, scrollbar_area, &mut scrollbar_state)
+    }
+
+    fn create_layout(&mut self, frame: &mut Frame<'_>) -> (Block<'static>, Rect, Rect) {
+        let title = Title::from("inspect-cert-chain".bold());
+
+        let instructions = Title::from(Line::from(vec![
+            " Next ".into(),
+            "<j> ".blue().bold(),
+            " Prev ".into(),
+            "<k> ".blue().bold(),
+            " Scroll Up ".into(),
+            "<up> ".blue().bold(),
+            " Scroll Down ".into(),
+            "<down> ".blue().bold(),
+            " Quit ".into(),
+            "<Q> ".blue().bold(),
+        ]));
 
         let outer_block = Block::default()
             .title(title.alignment(Alignment::Center))
@@ -84,36 +136,42 @@ impl App {
         let outer_block_area = outer_block.inner(frame.size());
         let [list_area, details_area] = layout.areas(outer_block_area);
 
-        // content
+        (outer_block, list_area, details_area)
+    }
 
+    fn create_list(&self) -> List<'static> {
         let list = self
             .certs
             .iter()
-            .map(|cert| cert.tbs_certificate.subject.to_string())
-            .collect::<List<'_>>();
+            .map(|(cert, _, _)| cert.tbs_certificate.subject.to_string())
+            .collect::<List<'static>>();
 
-        let list = list
-            .highlight_style(Style::new().bold())
-            .highlight_symbol("› ");
+        list.highlight_style(Style::new().bold())
+            .highlight_symbol("› ")
+    }
 
+    fn create_details(&self) -> (Paragraph<'static>, (Scrollbar<'static>, ScrollbarState)) {
         let selected = self.list_state.selected().unwrap();
 
-        let mut details = Vec::new();
-        write_cert_info(&self.certs[selected], &mut details)
-            .expect("io::Write-ing to a Vec always succeeds");
+        let scrollbar = Scrollbar::new(ScrollbarOrientation::VerticalRight)
+            .begin_symbol(Some("↑"))
+            .end_symbol(Some("↓"));
 
-        let details = Paragraph::new(
-            String::from_utf8(details)
-                .expect("everything written to details buffer should be UTF-8"),
-        )
-        .scroll((2, 0)) // trim first two lines
-        .block(Block::default().borders(Borders::TOP));
+        let details = self.certs[selected].1.to_owned();
 
-        // rendering
+        let scrollbar_state =
+            ScrollbarState::new(details.lines().count()).position(self.details_scroll);
 
-        frame.render_widget(outer_block, frame.size());
-        frame.render_stateful_widget(list, list_area, &mut self.list_state);
-        frame.render_widget(details, details_area);
+        let details = Paragraph::new(details)
+            .scroll((self.details_scroll as u16, 0))
+            .block(
+                Block::default()
+                    // visual separation from cert list
+                    .borders(Borders::TOP)
+                    .padding(Padding::new(1, 2, 0, 0)),
+            );
+
+        (details, (scrollbar, scrollbar_state))
     }
 
     fn handle_events(&mut self) -> io::Result<()> {
@@ -121,8 +179,13 @@ impl App {
             // check that the event is a key press event as crossterm also emits
             // key release and repeat events on Windows
             event::Event::Key(ev) if ev.kind == event::KeyEventKind::Press => {
-                self.handle_key_event(ev)
+                self.handle_key_event(ev);
             }
+
+            event::Event::Mouse(ev) => {
+                self.handle_mouse_event(ev);
+            }
+
             _ => {}
         };
 
@@ -132,15 +195,50 @@ impl App {
     fn handle_key_event(&mut self, ev: event::KeyEvent) {
         let max = self.certs.len() - 1;
         let selected = self.list_state.selected().unwrap();
+        let selected_cert_lines = self.certs[selected].2.saturating_sub(1);
 
         match ev.code {
-            event::KeyCode::Char('q') => self.exit = true,
+            event::KeyCode::Char('q') => {
+                self.exit = true;
+            }
 
-            event::KeyCode::Up => self.list_state.select(Some(selected.saturating_sub(1))),
+            event::KeyCode::Char('k') => {
+                self.list_state.select(Some(selected.saturating_sub(1)));
 
-            event::KeyCode::Down => self
-                .list_state
-                .select(Some(selected.saturating_add(1).clamp(0, max))),
+                self.details_scroll = 0;
+            }
+
+            event::KeyCode::Char('j') => {
+                self.list_state
+                    .select(Some(selected.saturating_add(1).clamp(0, max)));
+
+                self.details_scroll = 0;
+            }
+
+            event::KeyCode::Up => {
+                self.details_scroll = self.details_scroll.saturating_sub(1);
+            }
+
+            event::KeyCode::Down => {
+                self.details_scroll = self
+                    .details_scroll
+                    .saturating_add(1)
+                    .clamp(0, selected_cert_lines);
+            }
+
+            _ => {}
+        }
+    }
+
+    fn handle_mouse_event(&mut self, ev: event::MouseEvent) {
+        match ev.kind {
+            event::MouseEventKind::ScrollUp => {
+                self.details_scroll = self.details_scroll.saturating_sub(1);
+            }
+
+            event::MouseEventKind::ScrollDown => {
+                self.details_scroll = self.details_scroll.saturating_add(1);
+            }
 
             _ => {}
         }

@@ -66,7 +66,7 @@ fn main() -> eyre::Result<()> {
         .unwrap();
 
     let certs = if let Some(host) = &args.host {
-        tracing::info!("fetching certificate chain from remote host: {host}");
+        tracing::info!(%host, "fetching certificate chain from remote host");
         fetch::cert_chain(host)?
     } else if let Some(path) = &args.file {
         let mut input = if path == "-" {
@@ -124,7 +124,7 @@ fn main() -> eyre::Result<()> {
 
         let mut der_buf = Vec::with_capacity(1_024);
 
-        let pem_cap = certs.len() * 2_048; // ~2kb per cert
+        let pem_cap = certs.len() * 2_048; // ~2Kb per cert
 
         let pem_chain = certs.into_iter().try_fold(
             String::with_capacity(pem_cap),
