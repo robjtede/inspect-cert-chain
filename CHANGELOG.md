@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.0.16
+
+### Features
+
+- Enable ctrl-c to exit
+- Move list instructions to the cert block
+- TUI scrollbar
+- TUI MVP
+
+### Fixes
+
+- Skip rendering normal output header
+
 ## 0.0.15
 
 ### Changes
