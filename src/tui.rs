@@ -91,25 +91,16 @@ impl App {
 
         // rendering
 
-        let mut scrollbar_area = details_area;
-        // correct offset given top border
-        scrollbar_area.y += 1;
-        scrollbar_area.height -= 1;
-
         frame.render_widget(outer_block, frame.size());
         frame.render_stateful_widget(list, list_area, &mut self.list_state);
         frame.render_widget(details, details_area);
-        frame.render_stateful_widget(scrollbar, scrollbar_area, &mut scrollbar_state)
+        frame.render_stateful_widget(scrollbar, details_area, &mut scrollbar_state)
     }
 
     fn create_layout(&mut self, frame: &mut Frame<'_>) -> (Block<'static>, Rect, Rect) {
         let title = Title::from("inspect-cert-chain".bold());
 
         let instructions = Title::from(Line::from(vec![
-            " Next ".into(),
-            "<j> ".blue().bold(),
-            " Prev ".into(),
-            "<k> ".blue().bold(),
             " Scroll Up ".into(),
             "<up> ".blue().bold(),
             " Scroll Down ".into(),
@@ -129,8 +120,8 @@ impl App {
             .border_set(border::THICK);
 
         let layout = Layout::vertical([
-            Constraint::Length(self.certs.len() as u16), // list
-            Constraint::Fill(1),                         // details
+            Constraint::Length(self.certs.len() as u16 + 1), // list + border
+            Constraint::Fill(1),                             // details
         ]);
 
         let outer_block_area = outer_block.inner(frame.size());
@@ -146,16 +137,33 @@ impl App {
             .map(|(cert, _, _)| cert.tbs_certificate.subject.to_string())
             .collect::<List<'static>>();
 
+        let instructions = Title::from(Line::from(vec![
+            symbols::line::HORIZONTAL.into(),
+            " Certificate ".yellow().bold(),
+            " Next ".into(),
+            "<j> ".blue().bold(),
+            " Prev ".into(),
+            "<k> ".blue().bold(),
+        ]));
+
         list.highlight_style(Style::new().bold())
             .highlight_symbol("› ")
+            .block(
+                Block::default()
+                    // visual separation from cert details
+                    .borders(Borders::BOTTOM)
+                    .title(
+                        instructions
+                            .alignment(Alignment::Left)
+                            .position(Position::Bottom),
+                    ),
+            )
     }
 
     fn create_details(&self) -> (Paragraph<'static>, (Scrollbar<'static>, ScrollbarState)) {
         let selected = self.list_state.selected().unwrap();
 
-        let scrollbar = Scrollbar::new(ScrollbarOrientation::VerticalRight)
-            .begin_symbol(Some("↑"))
-            .end_symbol(Some("↓"));
+        let scrollbar = Scrollbar::new(ScrollbarOrientation::VerticalRight).track_symbol(None);
 
         let details = self.certs[selected].1.to_owned();
 
@@ -164,12 +172,7 @@ impl App {
 
         let details = Paragraph::new(details)
             .scroll((self.details_scroll as u16, 0))
-            .block(
-                Block::default()
-                    // visual separation from cert list
-                    .borders(Borders::TOP)
-                    .padding(Padding::new(1, 2, 0, 0)),
-            );
+            .block(Block::default().padding(Padding::new(1, 2, 1, 1)));
 
         (details, (scrollbar, scrollbar_state))
     }
