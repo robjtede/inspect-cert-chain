@@ -4,14 +4,7 @@
 
 ### Features
 
-- Enable ctrl-c to exit
-- Move list instructions to the cert block
-- TUI scrollbar
-- TUI MVP
-
-### Fixes
-
-- Skip rendering normal output header
+- Add interactive mode (`-i` / `--interactive`).
 
 ## 0.0.15
 
