@@ -41,6 +41,7 @@ struct Args {
     #[clap(long, conflicts_with = "host")]
     file: Option<camino::Utf8PathBuf>,
 
+    /// View certificate chain using interactive (TUI) mode.
     #[arg(short, long)]
     interactive: bool,
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.16
+
+### Features
+
+- Add interactive mode (`-i` / `--interactive`).
+
 ## 0.0.15
 
 ### Changes
