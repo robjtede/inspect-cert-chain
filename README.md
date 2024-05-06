@@ -2,6 +2,8 @@
 
 > OpenSSL-like text output for debugging certificate chains.
 
+[![asciicast](https://asciinema.org/a/657965.svg)](https://asciinema.org/a/657965)
+
 # Install
 
 With [`cargo-binstall`]:
