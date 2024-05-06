@@ -1,7 +1,8 @@
 use std::io;
 
 use crossterm::{
-    event, execute,
+    event::{self, KeyCode, KeyModifiers},
+    execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::{
@@ -106,7 +107,7 @@ impl App {
             " Scroll Down ".into(),
             "<down> ".blue().bold(),
             " Quit ".into(),
-            "<Q> ".blue().bold(),
+            "<Q / Ctrl-C> ".blue().bold(),
         ]));
 
         let outer_block = Block::default()
@@ -201,7 +202,9 @@ impl App {
         let selected_cert_lines = self.certs[selected].2.saturating_sub(1);
 
         match ev.code {
-            event::KeyCode::Char('q') => {
+            event::KeyCode::Char('q') | KeyCode::Char('c')
+                if ev.modifiers.contains(KeyModifiers::CONTROL) =>
+            {
                 self.exit = true;
             }
 
