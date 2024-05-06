@@ -112,6 +112,9 @@ fn main() -> eyre::Result<()> {
         let mut stdout = io::stdout();
 
         for cert in &certs {
+            writeln!(&mut stdout, "Certificate")?;
+            writeln!(&mut stdout, "===========")?;
+
             info::write_cert_info(cert, &mut stdout)?;
 
             writeln!(&mut stdout)?;

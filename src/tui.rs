@@ -48,7 +48,7 @@ impl App {
         Self {
             exit: false,
             list_state: ListState::default().with_selected(Some(0)),
-            details_scroll: 2, // trim first two (useless) lines
+            details_scroll: 0,
             certs: certs
                 .iter()
                 .cloned()

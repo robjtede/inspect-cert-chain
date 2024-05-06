@@ -12,9 +12,6 @@ use x509_cert::Certificate;
 use crate::{ext, util};
 
 pub(crate) fn write_cert_info(cert: &Certificate, mut wrt: impl io::Write) -> io::Result<()> {
-    writeln!(wrt, "Certificate")?;
-    writeln!(wrt, "===========")?;
-
     let tbs = &cert.tbs_certificate;
 
     let tbs_cert = &tbs;
