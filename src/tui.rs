@@ -202,9 +202,11 @@ impl App {
         let selected_cert_lines = self.certs[selected].2.saturating_sub(1);
 
         match ev.code {
-            event::KeyCode::Char('q') | KeyCode::Char('c')
-                if ev.modifiers.contains(KeyModifiers::CONTROL) =>
-            {
+            event::KeyCode::Char('q') => {
+                self.exit = true;
+            }
+
+            KeyCode::Char('c') if ev.modifiers.contains(KeyModifiers::CONTROL) => {
                 self.exit = true;
             }
 

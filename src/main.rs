@@ -14,6 +14,7 @@ use x509_cert::Certificate;
 mod ext;
 mod fetch;
 mod info;
+mod logging;
 mod tui;
 mod util;
 
@@ -54,12 +55,7 @@ fn main() -> eyre::Result<()> {
 
     let args = Args::parse();
 
-    if args.verbose == 0 {
-        pretty_env_logger::try_init_timed()?;
-    } else {
-        std::env::set_var("RUST_LOG", "info");
-        pretty_env_logger::try_init_timed()?;
-    }
+    logging::init(args.verbose)?;
 
     rustls::crypto::aws_lc_rs::default_provider()
         .install_default()
