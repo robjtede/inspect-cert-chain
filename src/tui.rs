@@ -227,10 +227,21 @@ impl App {
                 self.details_scroll = self.details_scroll.saturating_sub(1);
             }
 
+            event::KeyCode::PageUp => {
+                self.details_scroll = self.details_scroll.saturating_sub(10);
+            }
+
             event::KeyCode::Down => {
                 self.details_scroll = self
                     .details_scroll
                     .saturating_add(1)
+                    .clamp(0, selected_cert_lines);
+            }
+
+            event::KeyCode::PageDown => {
+                self.details_scroll = self
+                    .details_scroll
+                    .saturating_add(10)
                     .clamp(0, selected_cert_lines);
             }
 
