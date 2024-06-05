@@ -70,10 +70,17 @@ jobs:
       #   run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static" >> "${GITHUB_ENV}"
 
       - name: Build and upload to release
+        id: upload-release
         uses: taiki-e/upload-rust-binary-action@v1.19.2
         with:
           bin: inspect-cert-chain
           target: ${{ matrix.target }}
           tar: all
-          zip: windows
+          zip: all
+          checksum: sha256,sha512
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: ${{ steps.upload-release.outputs.zip }}
