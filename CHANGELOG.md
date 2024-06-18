@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.17
+
+### Features
+
+- Copy public key to clipboard
+- Add page up/down keybinds
+
 ## 0.0.16
 
 ### Features
