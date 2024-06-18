@@ -4,8 +4,8 @@
 
 ### Features
 
-- Copy public key to clipboard
-- Add page up/down keybinds
+- Copy public key to clipboard in interactive mode.
+- Add page up/down keybinds for interactive mode.
 
 ## 0.0.16
 
