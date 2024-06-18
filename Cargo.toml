@@ -10,6 +10,7 @@ edition = "2021"
 rust-version = "1.68"
 
 [dependencies]
+arboard = { version = "3", default-features = false }
 byteorder = "1"
 camino = "1"
 cfg-if = "1"

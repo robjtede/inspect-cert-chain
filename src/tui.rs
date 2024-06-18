@@ -5,6 +5,7 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
+use der::EncodePem as _;
 use ratatui::{
     layout::Constraint,
     prelude::*,
@@ -17,7 +18,7 @@ use ratatui::{
 };
 use x509_cert::Certificate;
 
-use crate::info::write_cert_info;
+use crate::{info::write_cert_info, LINE_ENDING};
 
 pub type Tui = Terminal<CrosstermBackend<io::Stdout>>;
 
@@ -106,6 +107,8 @@ impl App {
             "<up> ".blue().bold(),
             " Scroll Down ".into(),
             "<down> ".blue().bold(),
+            " Copy Public Key ".into(),
+            "<Ctrl-P> ".blue().bold(),
             " Quit ".into(),
             "<Q / Ctrl-C> ".blue().bold(),
         ]));
@@ -214,6 +217,20 @@ impl App {
                 self.list_state.select(Some(selected.saturating_sub(1)));
 
                 self.details_scroll = 0;
+            }
+
+            event::KeyCode::Char('p') if ev.modifiers.contains(KeyModifiers::CONTROL) => {
+                let spki = &self.certs[selected]
+                    .0
+                    .tbs_certificate
+                    .subject_public_key_info
+                    .to_pem(LINE_ENDING)
+                    .expect("SPKI should encode to PEM successfully");
+
+                let mut clipboard = arboard::Clipboard::new().expect("clipboard should initialize");
+                clipboard
+                    .set_text(spki)
+                    .expect("clipboard should be usable");
             }
 
             event::KeyCode::Char('j') => {
