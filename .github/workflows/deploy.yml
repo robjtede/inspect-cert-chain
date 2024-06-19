@@ -55,17 +55,9 @@ jobs:
         with:
           cache: false
 
-      # TODO: see if this is needed after next deploy
-      # - if: startsWith(matrix.os, 'ubuntu') && !endsWith(matrix.target, '-musl')
       - uses: taiki-e/setup-cross-toolchain-action@v1.22.0
         with:
           target: ${{ matrix.target }}
-
-      # TODO: see if this is needed after next deploy
-      # - if: endsWith(matrix.target, '-musl')
-      #   uses: taiki-e/install-action@v2.23.1
-      #   with:
-      #     tool: cross
 
       # TODO: see if this is needed after next deploy
       # - if: endsWith(matrix.target, 'windows-msvc')
