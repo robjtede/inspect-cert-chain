@@ -6,6 +6,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 env:
   CARGO_INCREMENTAL: 0
@@ -75,12 +77,10 @@ jobs:
         with:
           bin: inspect-cert-chain
           target: ${{ matrix.target }}
-          tar: all
-          zip: all
-          checksum: sha256,sha512
+          checksum: sha256
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
-          subject-path: ${{ steps.upload-release.outputs.zip }}
+          subject-path: "${{ steps.upload-release.outputs.archive }}.*"
