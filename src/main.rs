@@ -5,9 +5,9 @@ use std::{
     io::{self, Read as _, Write as _},
 };
 
-use clap::Parser;
+use clap::{CommandFactory as _, Parser};
 use der::{Decode as _, Encode as _};
-use eyre::WrapErr as _;
+use eyre::{eyre, WrapErr as _};
 use pem_rfc7468::{LineEnding, PemLabel as _};
 use x509_cert::Certificate;
 
@@ -67,6 +67,22 @@ fn main() -> eyre::Result<()> {
         fetch::cert_chain(host)?
     } else if let Some(path) = &args.file {
         let mut input = if path == "-" {
+            if args.interactive {
+                let mut err = clap::Error::new(clap::error::ErrorKind::ArgumentConflict)
+                    .with_cmd(&Args::command());
+
+                err.insert(
+                    clap::error::ContextKind::InvalidArg,
+                    clap::error::ContextValue::String("--interactive".to_owned()),
+                );
+                err.insert(
+                    clap::error::ContextKind::PriorArg,
+                    clap::error::ContextValue::String("--file -".to_owned()),
+                );
+
+                err.exit();
+            }
+
             tracing::info!("reading certificate chain from stdin");
 
             let mut buf = String::new();
@@ -90,14 +106,14 @@ fn main() -> eyre::Result<()> {
             .map(|der| x509_cert::Certificate::from_der(&der))
             .collect::<Result<_, _>>()?
     } else {
-        return Err(eyre::eyre!("use --host or --file"));
+        return Err(eyre!("use --host or --file"));
     };
 
     let n_certs = certs.len();
     tracing::info!("chain contains {n_certs} certificates");
 
     if n_certs == 0 {
-        return Err(eyre::eyre!("chain contained 0 certificates"));
+        return Err(eyre!("chain contained 0 certificates"));
     }
 
     if args.interactive {
