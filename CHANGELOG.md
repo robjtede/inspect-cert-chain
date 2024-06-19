@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.18
+
+### Fixes
+
+- Disallow interactive mode when reading from stdin
+
 ## 0.0.17
 
 ### Features
