@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Disallow interactive mode when reading from stdin
+- Disallow interactive mode when reading from stdin.
 
 ## 0.0.17
 
