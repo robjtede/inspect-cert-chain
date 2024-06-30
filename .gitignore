@@ -1,5 +1,8 @@
 # direnv
 .direnv
 
+# x52 toolchain
+.toolchain
+
 # Rust
 target/

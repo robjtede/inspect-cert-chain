@@ -1,3 +1,5 @@
+import ".toolchain/rust.just"
+
 _list:
     @just --list
 
