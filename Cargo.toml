@@ -18,7 +18,7 @@ chrono = "0.4.38"
 clap = { version = "4", features = ["derive"] }
 color-eyre = "0.6"
 const-oid = { version = "0.9.6", features = ["std", "db"] }
-crossterm = "0.27"
+crossterm = "0.28"
 der = { version = "0.7", features = ["std"] }
 error_reporter = "1"
 eyre = "0.6"
