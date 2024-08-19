@@ -93,7 +93,7 @@ impl App {
 
         // rendering
 
-        frame.render_widget(outer_block, frame.size());
+        frame.render_widget(outer_block, frame.area());
         frame.render_stateful_widget(list, list_area, &mut self.list_state);
         frame.render_widget(details, details_area);
         frame.render_stateful_widget(scrollbar, details_area, &mut scrollbar_state)
@@ -128,7 +128,7 @@ impl App {
             Constraint::Fill(1),                             // details
         ]);
 
-        let outer_block_area = outer_block.inner(frame.size());
+        let outer_block_area = outer_block.inner(frame.area());
         let [list_area, details_area] = layout.areas(outer_block_area);
 
         (outer_block, list_area, details_area)
