@@ -55,7 +55,7 @@ jobs:
         with:
           cache: false
 
-      - uses: taiki-e/setup-cross-toolchain-action@v1.23.0
+      - uses: taiki-e/setup-cross-toolchain-action@v1.23.2
         with:
           target: ${{ matrix.target }}
 
