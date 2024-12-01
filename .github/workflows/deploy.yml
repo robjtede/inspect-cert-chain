@@ -65,7 +65,7 @@ jobs:
 
       - name: Build and upload to release
         id: upload-release
-        uses: taiki-e/upload-rust-binary-action@v1.22.0
+        uses: taiki-e/upload-rust-binary-action@v1.23.0
         with:
           bin: inspect-cert-chain
           target: ${{ matrix.target }}
