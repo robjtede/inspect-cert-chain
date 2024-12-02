@@ -18,7 +18,7 @@ clippy-fix *args:
 
 # Test workspace.
 test:
-    cargo nextest run --workspace --all-features
+    cargo nextest run --workspace --all-features --no-tests=pass
 
 # Document workspace.
 doc *args:
