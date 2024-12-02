@@ -11,9 +11,8 @@ use ratatui::{
     prelude::*,
     symbols::border,
     widgets::{
-        block::{Block, Position, Title},
-        Borders, List, ListState, Padding, Paragraph, Scrollbar, ScrollbarOrientation,
-        ScrollbarState,
+        block::Block, Borders, List, ListState, Padding, Paragraph, Scrollbar,
+        ScrollbarOrientation, ScrollbarState,
     },
 };
 use x509_cert::Certificate;
@@ -100,9 +99,9 @@ impl App {
     }
 
     fn create_layout(&mut self, frame: &mut Frame<'_>) -> (Block<'static>, Rect, Rect) {
-        let title = Title::from("inspect-cert-chain".bold());
+        let title = Line::from("inspect-cert-chain".bold());
 
-        let instructions = Title::from(Line::from(vec![
+        let instructions = Line::from(vec![
             " Scroll Up ".into(),
             "<up> ".blue().bold(),
             " Scroll Down ".into(),
@@ -111,15 +110,11 @@ impl App {
             "<Ctrl-P> ".blue().bold(),
             " Quit ".into(),
             "<Q / Ctrl-C> ".blue().bold(),
-        ]));
+        ]);
 
         let outer_block = Block::default()
-            .title(title.alignment(Alignment::Center))
-            .title(
-                instructions
-                    .alignment(Alignment::Center)
-                    .position(Position::Bottom),
-            )
+            .title_top(title.centered())
+            .title_bottom(instructions.centered())
             .borders(Borders::ALL)
             .border_set(border::THICK);
 
@@ -141,14 +136,14 @@ impl App {
             .map(|(cert, _, _)| cert.tbs_certificate.subject.to_string())
             .collect::<List<'static>>();
 
-        let instructions = Title::from(Line::from(vec![
+        let instructions = Line::from(vec![
             symbols::line::HORIZONTAL.into(),
             " Certificate ".yellow().bold(),
             " Next ".into(),
             "<j> ".blue().bold(),
             " Prev ".into(),
             "<k> ".blue().bold(),
-        ]));
+        ]);
 
         list.highlight_style(Style::new().bold())
             .highlight_symbol("› ")
@@ -156,11 +151,7 @@ impl App {
                 Block::default()
                     // visual separation from cert details
                     .borders(Borders::BOTTOM)
-                    .title(
-                        instructions
-                            .alignment(Alignment::Left)
-                            .position(Position::Bottom),
-                    ),
+                    .title_bottom(instructions.centered()),
             )
     }
 
