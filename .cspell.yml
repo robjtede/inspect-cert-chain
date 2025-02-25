@@ -1,0 +1,27 @@
+version: "0.2"
+words:
+  - arboard
+  - binstall
+  - byteorder
+  - chrono
+  - clippy
+  - crossterm
+  - datetime
+  - docsrs
+  - extn
+  - itertools
+  - memchr
+  - memmem
+  - nextest
+  - nixpkgs
+  - ocsp
+  - pemfile
+  - pkgs
+  - pkix
+  - powerset
+  - ratatui
+  - rustls
+  - scts
+  - spki
+  - taplo
+  - webpki

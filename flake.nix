@@ -1,6 +1,7 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    flake-parts.url = "github:hercules-ci/flake-parts";
     x52 = {
       url = "github:x52dev/nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -41,14 +42,11 @@
             buildInputs = [ x52just ];
 
             packages = [
-              # scripting
-              pkgs.just
-              pkgs.watchexec
-
-              # formatters
               config.formatter
+              pkgs.just
               pkgs.nodePackages.prettier
               pkgs.taplo
+              pkgs.watchexec
             ] ++ macSdk;
 
             shellHook = ''

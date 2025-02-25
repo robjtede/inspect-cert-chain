@@ -135,4 +135,8 @@ const OID_DESCS: &[(&ObjectIdentifier, &str)] = &[
         &ObjectIdentifier::new_unwrap("2.16.840.1.114412.2.1"),
         "DigiCert Extended Validation (EV) Guidelines",
     ),
+    (
+        &ObjectIdentifier::new_unwrap("1.3.6.1.5.5.7.1.31"),
+        "ACME Identifier",
+    ),
 ];
