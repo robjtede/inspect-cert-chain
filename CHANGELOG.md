@@ -4,7 +4,7 @@
 
 ### Features
 
-- Add OID for ACME identifier extension.
+- Support ACME identifier extension.
 
 ## 0.0.18
 
