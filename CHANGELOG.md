@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.19
+
+### Features
+
+- Add OID for ACME identifier extension
+
 ## 0.0.18
 
 ### Fixes
