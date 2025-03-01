@@ -33,7 +33,7 @@ jobs:
 
       - name: Install nasm
         if: matrix.target.os == 'windows-latest'
-        uses: ilammy/setup-nasm@v1.5.1
+        uses: ilammy/setup-nasm@v1.5.2
 
       - name: Install Rust (${{ matrix.version.version }})
         uses: actions-rust-lang/setup-rust-toolchain@v1.10.1
