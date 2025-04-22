@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.20
+
+### Features
+
+- Add --port option
+
 ## 0.0.19
 
 ### Features
