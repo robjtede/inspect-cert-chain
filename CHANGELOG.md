@@ -4,7 +4,7 @@
 
 ### Features
 
-- Add --port option
+- Add `--port` option.
 
 ## 0.0.19
 
