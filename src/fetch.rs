@@ -11,7 +11,7 @@ use rustls::RootCertStore;
 use rustls_pki_types::ServerName;
 use x509_cert::Certificate;
 
-pub(crate) fn cert_chain(host: &str) -> eyre::Result<Vec<Certificate>> {
+pub(crate) fn cert_chain(host: &str, port: u16) -> eyre::Result<Vec<Certificate>> {
     let server_name = ServerName::try_from(host)
         .with_context(|| format!("failed to convert given host (\"{host}\") to server name"))?
         .to_owned();
@@ -29,8 +29,8 @@ pub(crate) fn cert_chain(host: &str) -> eyre::Result<Vec<Certificate>> {
         .set_certificate_verifier(Arc::new(NoopServerCertVerifier));
 
     let mut conn = rustls::ClientConnection::new(Arc::new(config), server_name)?;
-    let mut sock = TcpStream::connect(format!("{host}:443"))
-        .wrap_err_with(|| format!("failed to connect to host: {host}:443"))?;
+    let mut sock = TcpStream::connect(format!("{host}:{port}"))
+        .wrap_err_with(|| format!("failed to connect to host: {host}:{port}"))?;
     let mut tls = rustls::Stream::new(&mut conn, &mut sock);
 
     let req = format!(

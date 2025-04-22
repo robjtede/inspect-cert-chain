@@ -1,5 +1,3 @@
-#![deny(rust_2018_idioms, future_incompatible)]
-
 use std::{
     fs,
     io::{self, Read as _, Write as _},
@@ -33,6 +31,10 @@ struct Args {
     #[clap(long, conflicts_with = "file")]
     host: Option<String>,
 
+    /// Port to use with --host.
+    #[clap(long, conflicts_with = "file", default_value_t = 443)]
+    port: u16,
+
     /// When provided, writes downloaded chain to file in PEM format.
     #[clap(long, conflicts_with = "file")]
     dump: Option<camino::Utf8PathBuf>,
@@ -64,7 +66,7 @@ fn main() -> eyre::Result<()> {
 
     let certs = if let Some(host) = &args.host {
         tracing::info!(%host, "fetching certificate chain from remote host");
-        fetch::cert_chain(host)?
+        fetch::cert_chain(host, args.port)?
     } else if let Some(path) = &args.file {
         let mut input = if path == "-" {
             if args.interactive {
