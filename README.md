@@ -6,6 +6,12 @@
 
 # Install
 
+With [`Homebrew`]:
+
+```console
+$ brew install x52dev/tap/inspect-cert-chain
+```
+
 With [`cargo-binstall`]:
 
 ```console
@@ -47,4 +53,5 @@ cat <path> | inspect-cert-chain --file -
 - [x] Option to read local chain files.
 - [ ] Determine chain validity.
 
+[`homebrew`]: https://brew.sh
 [`cargo-binstall`]: https://github.com/cargo-bins/cargo-binstall
