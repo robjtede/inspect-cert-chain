@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.21
+
+### Features
+
+- Stylize important info
+
 ## 0.0.20
 
 ### Features
