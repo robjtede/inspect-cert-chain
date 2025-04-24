@@ -1,5 +1,6 @@
 use std::io;
 
+use ansi_to_tui::IntoText as _;
 use crossterm::{
     event::{self, KeyCode, KeyModifiers},
     execute,
@@ -56,7 +57,7 @@ impl App {
                 .map(|cert| {
                     let mut details = Vec::with_capacity(4_096); // roughly ~4Kb of output
 
-                    write_cert_info(&cert, &mut details)
+                    write_cert_info(&cert, &mut details, true)
                         .expect("io::Write-ing to a Vec always succeeds");
 
                     let details = String::from_utf8(details)
@@ -158,14 +159,14 @@ impl App {
     fn create_details(&self) -> (Paragraph<'static>, (Scrollbar<'static>, ScrollbarState)) {
         let selected = self.list_state.selected().unwrap();
 
-        let scrollbar = Scrollbar::new(ScrollbarOrientation::VerticalRight).track_symbol(None);
-
         let details = self.certs[selected].1.to_owned();
 
         let scrollbar_state =
             ScrollbarState::new(details.lines().count()).position(self.details_scroll);
 
-        let details = Paragraph::new(details)
+        let scrollbar = Scrollbar::new(ScrollbarOrientation::VerticalRight).track_symbol(None);
+
+        let details = Paragraph::new(details.into_text().expect("should be valid ANSI"))
             .scroll((self.details_scroll as u16, 0))
             .block(Block::default().padding(Padding::new(1, 2, 1, 1)));
 

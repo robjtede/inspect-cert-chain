@@ -10,6 +10,7 @@ edition = "2021"
 rust-version = "1.70"
 
 [dependencies]
+ansi-to-tui = "7"
 arboard = { version = "3", default-features = false }
 byteorder = "1"
 camino = "1"
@@ -33,6 +34,7 @@ tracing = { version = "0.1.41", features = ["log", "release_max_level_debug"] }
 tracing-subscriber = "0.3"
 webpki-roots = "0.26"
 x509-cert = { version = "0.2.5", features = ["sct"] }
+yansi = "1"
 
 [profile.release]
 lto = true

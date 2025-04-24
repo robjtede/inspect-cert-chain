@@ -48,7 +48,8 @@ pub(crate) fn oid_desc_or_raw(oid: &ObjectIdentifier) -> String {
         .unwrap_or_else(|| oid.to_string())
 }
 
-pub(crate) fn duration_since_now_fmt(time: x509_cert::time::Time) -> String {
+/// Returns formatted date and true if date is in the future.
+pub(crate) fn duration_since_now_fmt(time: x509_cert::time::Time) -> (String, bool) {
     use chrono::{DateTime, Utc};
 
     let ts = time.to_unix_duration().as_secs() as i64;
@@ -61,9 +62,9 @@ pub(crate) fn duration_since_now_fmt(time: x509_cert::time::Time) -> String {
     let days = duration.num_days();
 
     if now > date {
-        format!("{} days ago", days)
+        (format!("{} days ago", days), false)
     } else {
-        format!("in {} days", days)
+        (format!("in {} days", days), true)
     }
 }
 

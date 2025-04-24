@@ -5,19 +5,28 @@ use const_oid::{
     db::rfc5912::{ID_EC_PUBLIC_KEY, RSA_ENCRYPTION},
     ObjectIdentifier,
 };
+use crossterm::style::Stylize as _;
 use der::Decode as _;
 use itertools::Itertools as _;
 use x509_cert::Certificate;
 
 use crate::{ext, util};
 
-pub(crate) fn write_cert_info(cert: &Certificate, mut wrt: impl io::Write) -> io::Result<()> {
+pub(crate) fn write_cert_info(
+    cert: &Certificate,
+    mut wrt: impl io::Write,
+    stylize: bool,
+) -> io::Result<()> {
     let tbs = &cert.tbs_certificate;
 
     let tbs_cert = &tbs;
-    writeln!(wrt, "Subject: {}", tbs_cert.subject)?;
+    writeln!(
+        wrt,
+        "Subject: {}",
+        tbs_cert.subject.to_string().yellow().bold()
+    )?;
 
-    writeln!(wrt, "Issuer: {}", tbs.issuer)?;
+    writeln!(wrt, "Issuer: {}", tbs.issuer.to_string().blue().bold())?;
 
     writeln!(wrt, "Version: {:?}", tbs.version)?;
     writeln!(
@@ -42,22 +51,56 @@ pub(crate) fn write_cert_info(cert: &Certificate, mut wrt: impl io::Write) -> io
             .map(|serial| util::openssl_hex(serial.as_bytes().unwrap(), 20).join("\n  "))
             .unwrap_or_else(|| "<unknown>".to_owned())
     )?;
-    writeln!(wrt, "Validity:")?;
+
+    let (nbf, nbf_in_future) = util::duration_since_now_fmt(tbs.validity.not_before);
+    let (exp, exp_in_future) = util::duration_since_now_fmt(tbs.validity.not_after);
+
+    writeln!(
+        wrt,
+        "{}",
+        if stylize {
+            if !nbf_in_future && exp_in_future {
+                "Validity:".green().bold()
+            } else {
+                "Validity:".red()
+            }
+        } else {
+            "Validity:".stylize()
+        }
+    )?;
+
     writeln!(
         wrt,
         "  Not Before: {} ({})",
         tbs.validity.not_before,
-        util::duration_since_now_fmt(tbs.validity.not_before),
+        if stylize {
+            if nbf_in_future {
+                nbf.red().bold()
+            } else {
+                nbf.green().bold()
+            }
+        } else {
+            nbf.stylize()
+        },
     )?;
+
     writeln!(
         wrt,
         "  Not After: {} ({})",
         tbs.validity.not_after,
-        util::duration_since_now_fmt(tbs.validity.not_after),
+        if stylize {
+            if exp_in_future {
+                exp.green().bold()
+            } else {
+                exp.red().bold()
+            }
+        } else {
+            exp.stylize()
+        },
     )?;
 
     // if let Some(name_constraints) = anchor.name_constraints {
-    //     writeln!(w, "Name Constraints: {:?}", name_constraints);
+    //     writeln!(wrt, "Name Constraints: {:?}", name_constraints);
     // }
 
     writeln!(wrt, "Subject Public Key Info:")?;

@@ -130,7 +130,7 @@ fn main() -> eyre::Result<()> {
             writeln!(&mut stdout, "Certificate")?;
             writeln!(&mut stdout, "===========")?;
 
-            info::write_cert_info(cert, &mut stdout)?;
+            info::write_cert_info(cert, &mut stdout, false)?;
 
             writeln!(&mut stdout)?;
             writeln!(&mut stdout)?;
