@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.21
+
+### Features
+
+- Stylize important info in interactive view.
+
 ## 0.0.20
 
 ### Features
