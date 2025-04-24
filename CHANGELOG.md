@@ -4,7 +4,7 @@
 
 ### Features
 
-- Stylize important info
+- Stylize important info in interactive view.
 
 ## 0.0.20
 
