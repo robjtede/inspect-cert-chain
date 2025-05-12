@@ -7,8 +7,8 @@ use std::{
 use der::Decode;
 use error_reporter::Report;
 use eyre::WrapErr as _;
-use rustls::RootCertStore;
 use rustls_pki_types::ServerName;
+use rustls_platform_verifier::BuilderVerifierExt as _;
 use x509_cert::Certificate;
 
 pub(crate) fn cert_chain(host: &str, port: u16) -> eyre::Result<Vec<Certificate>> {
@@ -16,12 +16,9 @@ pub(crate) fn cert_chain(host: &str, port: u16) -> eyre::Result<Vec<Certificate>
         .with_context(|| format!("failed to convert given host (\"{host}\") to server name"))?
         .to_owned();
 
-    let mut root_store = RootCertStore::empty();
-    root_store.extend(webpki_roots::TLS_SERVER_ROOTS.to_owned());
-
     let mut config =
         rustls::ClientConfig::builder_with_protocol_versions(&[&rustls::version::TLS12])
-            .with_root_certificates(root_store)
+            .with_platform_verifier()
             .with_no_client_auth();
 
     config
