@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.22
+
+### Features
+
+- Use rustls-platform-verifier
+
 ## 0.0.21
 
 ### Features
