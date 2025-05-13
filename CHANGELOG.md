@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.22
+
+### Features
+
+- Use platform certificate verifier.
+
 ## 0.0.21
 
 ### Features
