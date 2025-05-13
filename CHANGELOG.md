@@ -4,7 +4,7 @@
 
 ### Features
 
-- Use rustls-platform-verifier
+- Use platform certificate verifier.
 
 ## 0.0.21
 
