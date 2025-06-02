@@ -30,7 +30,7 @@ ratatui = "0.29"
 rustls = "0.23"
 rustls-pemfile = "2"
 rustls-pki-types = "1"
-rustls-platform-verifier = "0.5"
+rustls-platform-verifier = "0.6"
 tracing = { version = "0.1.41", features = ["log", "release_max_level_debug"] }
 tracing-subscriber = "0.3"
 x509-cert = { version = "0.2.5", features = ["sct"] }
