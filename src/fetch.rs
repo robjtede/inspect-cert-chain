@@ -18,7 +18,7 @@ pub(crate) fn cert_chain(host: &str, port: u16) -> eyre::Result<Vec<Certificate>
 
     let mut config =
         rustls::ClientConfig::builder_with_protocol_versions(&[&rustls::version::TLS12])
-            .with_platform_verifier()
+            .with_platform_verifier()?
             .with_no_client_auth();
 
     config
