@@ -273,15 +273,15 @@ fn fmt_subject_key_identifier(ext: &Extension) -> String {
 //TODO: remove debug format for OtherName, EdiPartyName
 fn fmt_general_name(name: &GeneralName) -> String {
     match name {
-        GeneralName::OtherName(other) => format!("OTHER{:?}", other),
+        GeneralName::OtherName(other) => format!("OTHER{other:?}"),
         GeneralName::Rfc822Name(rfc) => format!("RFC:{}", rfc.as_str()),
         GeneralName::DnsName(dns) => format!("DNS:{}", dns.as_str()),
-        GeneralName::DirectoryName(dir) => format!("DIR:{}", dir),
-        GeneralName::EdiPartyName(edi) => format!("EDI:{:?}", edi),
+        GeneralName::DirectoryName(dir) => format!("DIR:{dir}"),
+        GeneralName::EdiPartyName(edi) => format!("EDI:{edi:?}"),
         GeneralName::UniformResourceIdentifier(uri) => format!("URI:{}", uri.as_str()),
         GeneralName::IpAddress(ip) => match ip_try_from_bytes(ip.as_bytes()) {
-            Some(ip) => format!("IP:{}", ip),
-            None => format!("IP:{:?}", ip),
+            Some(ip) => format!("IP:{ip}"),
+            None => format!("IP:{ip:?}"),
         },
         GeneralName::RegisteredId(id) => oid_desc_or_raw(id),
     }

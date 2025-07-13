@@ -62,9 +62,9 @@ pub(crate) fn duration_since_now_fmt(time: x509_cert::time::Time) -> (String, bo
     let days = duration.num_days();
 
     if now > date {
-        (format!("{} days ago", days), false)
+        (format!("{days} days ago"), false)
     } else {
-        (format!("in {} days", days), true)
+        (format!("in {days} days"), true)
     }
 }
 
