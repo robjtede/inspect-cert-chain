@@ -44,7 +44,7 @@ jobs:
     timeout-minutes: 60
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install nasm
         if: matrix.target.os == 'windows-latest'
