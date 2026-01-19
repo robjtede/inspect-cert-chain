@@ -15,7 +15,7 @@ arboard = { version = "3", default-features = false }
 byteorder = "1"
 camino = "1"
 cfg-if = "1"
-chrono = "0.4.42"
+chrono = "0.4.43"
 clap = { version = "4", features = ["derive"] }
 color-eyre = "0.6"
 const-oid = { version = "0.9.6", features = ["std", "db"] }
