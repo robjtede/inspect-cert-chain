@@ -4,6 +4,12 @@
 
 - No significant changes.
 
+## 0.0.23
+
+### Features
+
+- Use platform certificate verifier.
+
 ## 0.0.22
 
 ### Features
