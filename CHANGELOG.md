@@ -2,6 +2,7 @@
 
 ## 0.0.24
 
+- No significant changes.
 
 ## 0.0.22
 
