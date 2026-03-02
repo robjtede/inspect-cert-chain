@@ -5,7 +5,7 @@ use std::{
 
 use clap::{CommandFactory as _, Parser};
 use der::{Decode as _, Encode as _};
-use eyre::{eyre, WrapErr as _};
+use eyre::{WrapErr as _, eyre};
 use pem_rfc7468::{LineEnding, PemLabel as _};
 use x509_cert::Certificate;
 

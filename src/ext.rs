@@ -4,8 +4,8 @@ use const_oid::AssociatedOid as _;
 use der::Decode;
 use itertools::Itertools;
 use x509_cert::ext::{
-    pkix::{self, crl::dp, name::GeneralName, sct, AuthorityKeyIdentifier},
     Extension,
+    pkix::{self, AuthorityKeyIdentifier, crl::dp, name::GeneralName, sct},
 };
 
 use crate::util::{oid_desc_or_raw, openssl_hex};
@@ -185,7 +185,8 @@ fn fmt_sct(sct: sct::SignedCertificateTimestamp) -> String {
         "Signed Certificate Timestamp:\n      Version   : {:?}\n      Log ID    : {}\n      Timestamp : {}\n      Extensions: {}\n      Signature : {}\n                  {}",
         sct.version,
         openssl_hex(&sct.log_id.key_id, 16).join("\n                  "),
-        sct.timestamp().expect("SCT timestamp is outside supported range"),
+        sct.timestamp()
+            .expect("SCT timestamp is outside supported range"),
         if extensions.is_empty() {
             "none"
         } else {

@@ -2,8 +2,8 @@ use std::io;
 
 use byteorder::{BigEndian, ByteOrder as _};
 use const_oid::{
-    db::rfc5912::{ID_EC_PUBLIC_KEY, RSA_ENCRYPTION},
     ObjectIdentifier,
+    db::rfc5912::{ID_EC_PUBLIC_KEY, RSA_ENCRYPTION},
 };
 use crossterm::style::Stylize as _;
 use der::Decode as _;

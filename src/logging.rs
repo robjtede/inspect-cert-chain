@@ -1,5 +1,5 @@
 use eyre::eyre;
-use tracing::{level_filters::LevelFilter, Level};
+use tracing::{Level, level_filters::LevelFilter};
 use tracing_subscriber::prelude::*;
 
 /// Initializes logging.

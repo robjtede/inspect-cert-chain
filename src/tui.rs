@@ -4,7 +4,7 @@ use ansi_to_tui::IntoText as _;
 use crossterm::{
     event::{self, KeyCode, KeyModifiers},
     execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
 use der::EncodePem as _;
 use ratatui::{
@@ -12,13 +12,13 @@ use ratatui::{
     prelude::*,
     symbols::border,
     widgets::{
-        block::Block, Borders, List, ListState, Padding, Paragraph, Scrollbar,
-        ScrollbarOrientation, ScrollbarState,
+        Borders, List, ListState, Padding, Paragraph, Scrollbar, ScrollbarOrientation,
+        ScrollbarState, block::Block,
     },
 };
 use x509_cert::Certificate;
 
-use crate::{info::write_cert_info, LINE_ENDING};
+use crate::{LINE_ENDING, info::write_cert_info};
 
 pub type Tui = Terminal<CrosstermBackend<io::Stdout>>;
 

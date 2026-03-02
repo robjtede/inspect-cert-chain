@@ -4,8 +4,8 @@ use std::io::Read;
 
 use chrono::TimeZone as _;
 use const_oid::{
-    db::{rfc5280, rfc5912, rfc6962, Database, DB},
     ObjectIdentifier,
+    db::{DB, Database, rfc5280, rfc5912, rfc6962},
 };
 use itertools::Itertools as _;
 use x509_cert::spki::{AlgorithmIdentifier, AlgorithmIdentifierOwned};
@@ -83,7 +83,7 @@ pub(crate) fn openssl_hex(bytes: &[u8], width: usize) -> impl Iterator<Item = St
 fn get_oid_desc(oid: &ObjectIdentifier) -> Option<&str> {
     OID_DESCS
         .iter()
-        .find(|(&id, _)| id == *oid)
+        .find(|&&(&id, _)| id == *oid)
         .map(|&(_, desc)| desc)
 }
 
