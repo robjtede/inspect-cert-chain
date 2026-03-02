@@ -12,8 +12,8 @@ use ratatui::{
     prelude::*,
     symbols::border,
     widgets::{
-        Borders, List, ListState, Padding, Paragraph, Scrollbar, ScrollbarOrientation,
-        ScrollbarState, block::Block,
+        Block, Borders, List, ListState, Padding, Paragraph, Scrollbar, ScrollbarOrientation,
+        ScrollbarState,
     },
 };
 use x509_cert::Certificate;
