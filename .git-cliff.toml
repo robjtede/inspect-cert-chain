@@ -11,13 +11,18 @@ body = """
     ## Unreleased
 
 {% endif %}\
-{% for group, commits in commits | filter(attribute="group", value="Features") | group_by(attribute="group") %}\
+{% set feature_commits = commits | filter(attribute="group", value="Features") %}\
+{% set fix_commits = commits | filter(attribute="group", value="Fixes") %}\
+{% if feature_commits | length == 0 and fix_commits | length == 0 %}\
+    - No significant changes since {{ previous.version | trim_start_matches(pat="v") }}.
+{% endif %}\
+{% for group, commits in feature_commits | group_by(attribute="group") %}\
     ### {{ group | upper_first }}
     {% for commit in commits %}
         - {{ commit.message | upper_first }}\
     {% endfor %}\n
 {% endfor %}\
-{% for group, commits in commits | filter(attribute="group", value="Fixes") | group_by(attribute="group") %}\
+{% for group, commits in fix_commits | group_by(attribute="group") %}\
     ### {{ group | upper_first }}
     {% for commit in commits %}
         - {{ commit.message | upper_first }}\
