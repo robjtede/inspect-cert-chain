@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.26
+
+- No significant changes since 0.0.25.
+
 ## 0.0.25
 
 - No significant changes since 0.0.24.

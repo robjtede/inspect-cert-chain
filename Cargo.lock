@@ -916,7 +916,7 @@ dependencies = [
 
 [[package]]
 name = "inspect-cert-chain"
-version = "0.0.25"
+version = "0.0.26"
 dependencies = [
  "ansi-to-tui",
  "arboard",
