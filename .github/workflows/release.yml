@@ -1,32 +1,107 @@
 name: Release
 
 on:
-  push: { branches: [main] }
+  push:
+    branches: [main]
 
 permissions:
-  contents: write
   pull-requests: write
+  contents: write
   id-token: write
+  attestations: write
 
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    if: ${{ github.repository_owner == 'robjtede' }}
+    outputs:
+      releases: ${{ steps.release-plz.outputs.releases }}
+      releases_created: ${{ steps.release-plz.outputs.releases_created }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1.15.4
+        uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # v1.16.0
 
       - name: Authenticate with crates.io
-        uses: rust-lang/crates-io-auth-action@v1.0.4
+        uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1.0.4
         id: auth
 
       - name: release-plz
-        uses: MarcoIeni/release-plz-action@v0.5.128
+        uses: MarcoIeni/release-plz-action@1528104d2ca23787631a1c1f022abb64b34c1e11 # v0.5.128
+        id: release-plz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+
+  upload-assets:
+    name: Upload release assets
+    needs: release
+    if: ${{ needs.release.outputs.releases_created == 'true' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: macos-latest, target: aarch64-apple-darwin }
+          - { os: macos-latest, target: universal-apple-darwin }
+          - { os: macos-latest, target: x86_64-apple-darwin }
+          - { os: ubuntu-latest, target: aarch64-unknown-linux-gnu }
+          - { os: ubuntu-latest, target: aarch64-unknown-linux-musl }
+          # - { os: ubuntu-latest, target: x86_64-unknown-freebsd } # not supported by aws-lc
+          - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu }
+          - { os: ubuntu-latest, target: x86_64-unknown-linux-musl }
+          # - { os: windows-latest, target: aarch64-pc-windows-msvc } # not supported by aws-lc
+          - { os: windows-latest, target: x86_64-pc-windows-msvc }
+
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+
+    env:
+      CARGO_INCREMENTAL: 0
+      CARGO_NET_GIT_FETCH_WITH_CLI: true
+      CARGO_NET_RETRY: 10
+      CARGO_TERM_COLOR: always
+      RELEASE_TAG: ${{ fromJSON(needs.release.outputs.releases)[0].tag }}
+      RUST_BACKTRACE: 1
+      RUSTUP_MAX_RETRIES: 10
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+
+      - name: Install nasm
+        if: matrix.os == 'windows-latest'
+        uses: ilammy/setup-nasm@72793074d3c8cdda771dba85f6deafe00623038b # v1.5.2
+
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # v1.16.0
+        with:
+          cache: false
+
+      - uses: taiki-e/setup-cross-toolchain-action@d62f33b587e73b0004731caebc7d2d46b18a7567 # v1.39.2
+        with:
+          target: ${{ matrix.target }}
+
+      # TODO: see if this is needed after next deploy
+      # - if: endsWith(matrix.target, 'windows-msvc')
+      #   run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static" >> "${GITHUB_ENV}"
+
+      - name: Build and upload to release
+        id: upload-release
+        uses: taiki-e/upload-rust-binary-action@f0d45ae91ee7b8ee928de7a9d04d893a08bcbec6 # v1.30.2
+        with:
+          bin: inspect-cert-chain
+          target: ${{ matrix.target }}
+          checksum: sha256
+          ref: refs/tags/${{ env.RELEASE_TAG }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        with:
+          subject-path: "${{ steps.upload-release.outputs.archive }}.*"
