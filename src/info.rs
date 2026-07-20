@@ -6,8 +6,8 @@ use const_oid::{
     db::rfc5912::{ID_EC_PUBLIC_KEY, RSA_ENCRYPTION},
 };
 use crossterm::style::Stylize as _;
-use der::Decode as _;
 use itertools::Itertools as _;
+use pkcs1::der::Decode as _;
 use x509_cert::Certificate;
 
 use crate::{ext, util};
@@ -17,43 +17,43 @@ pub(crate) fn write_cert_info(
     mut wrt: impl io::Write,
     stylize: bool,
 ) -> io::Result<()> {
-    let tbs = &cert.tbs_certificate;
+    let tbs = cert.tbs_certificate();
 
-    let tbs_cert = &tbs;
+    let tbs_cert = tbs;
     writeln!(
         wrt,
         "Subject: {}",
-        tbs_cert.subject.to_string().yellow().bold()
+        tbs_cert.subject().to_string().yellow().bold()
     )?;
 
-    writeln!(wrt, "Issuer: {}", tbs.issuer.to_string().blue().bold())?;
+    writeln!(wrt, "Issuer: {}", tbs.issuer().to_string().blue().bold())?;
 
-    writeln!(wrt, "Version: {:?}", tbs.version)?;
+    writeln!(wrt, "Version: {:?}", tbs.version())?;
     writeln!(
         wrt,
         "Serial Number:\n  {}",
-        util::openssl_hex(tbs.serial_number.as_bytes(), 20).join("\n  ")
+        util::openssl_hex(tbs.serial_number().as_bytes(), 20).join("\n  ")
     )?;
 
     writeln!(
         wrt,
         "Signature Algorithm: {}",
-        util::oid_desc_or_raw(&cert.signature_algorithm.oid)
+        util::oid_desc_or_raw(&cert.signature_algorithm().oid)
     )?;
-    util::assert_null_params(&cert.signature_algorithm);
+    util::assert_null_params(cert.signature_algorithm());
 
     // TODO: doesn't work ?
     writeln!(
         wrt,
         "Issuer Serial Number:\n  {}",
-        tbs.issuer_unique_id
+        tbs.issuer_unique_id()
             .as_ref()
             .map(|serial| util::openssl_hex(serial.as_bytes().unwrap(), 20).join("\n  "))
             .unwrap_or_else(|| "<unknown>".to_owned())
     )?;
 
-    let (nbf, nbf_in_future) = util::duration_since_now_fmt(tbs.validity.not_before);
-    let (exp, exp_in_future) = util::duration_since_now_fmt(tbs.validity.not_after);
+    let (nbf, nbf_in_future) = util::duration_since_now_fmt(tbs.validity().not_before);
+    let (exp, exp_in_future) = util::duration_since_now_fmt(tbs.validity().not_after);
 
     writeln!(
         wrt,
@@ -72,7 +72,7 @@ pub(crate) fn write_cert_info(
     writeln!(
         wrt,
         "  Not Before: {} ({})",
-        tbs.validity.not_before,
+        tbs.validity().not_before,
         if stylize {
             if nbf_in_future {
                 nbf.red().bold()
@@ -87,7 +87,7 @@ pub(crate) fn write_cert_info(
     writeln!(
         wrt,
         "  Not After: {} ({})",
-        tbs.validity.not_after,
+        tbs.validity().not_after,
         if stylize {
             if exp_in_future {
                 exp.green().bold()
@@ -105,7 +105,7 @@ pub(crate) fn write_cert_info(
 
     writeln!(wrt, "Subject Public Key Info:")?;
 
-    let spki = &tbs_cert.subject_public_key_info;
+    let spki = tbs_cert.subject_public_key_info();
     let alg = &spki.algorithm;
 
     match () {
@@ -154,7 +154,7 @@ pub(crate) fn write_cert_info(
         }
     }
 
-    if let Some(extensions) = &tbs.extensions {
+    if let Some(extensions) = tbs.extensions() {
         writeln!(wrt, "Extensions:")?;
 
         for ext in extensions {
@@ -173,7 +173,7 @@ pub(crate) fn write_cert_info(
     writeln!(
         wrt,
         "  {}",
-        util::openssl_hex(cert.signature.as_bytes().unwrap(), 20).join("\n  ")
+        util::openssl_hex(cert.signature().as_bytes().unwrap(), 20).join("\n  ")
     )?;
 
     Ok(())

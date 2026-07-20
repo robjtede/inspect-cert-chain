@@ -134,7 +134,7 @@ impl App {
         let list = self
             .certs
             .iter()
-            .map(|(cert, _, _)| cert.tbs_certificate.subject.to_string())
+            .map(|(cert, _, _)| cert.tbs_certificate().subject().to_string())
             .collect::<List<'static>>();
 
         let instructions = Line::from(vec![
@@ -214,8 +214,8 @@ impl App {
             event::KeyCode::Char('p') if ev.modifiers.contains(KeyModifiers::CONTROL) => {
                 let spki = &self.certs[selected]
                     .0
-                    .tbs_certificate
-                    .subject_public_key_info
+                    .tbs_certificate()
+                    .subject_public_key_info()
                     .to_pem(LINE_ENDING)
                     .expect("SPKI should encode to PEM successfully");
 
