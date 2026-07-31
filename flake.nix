@@ -40,7 +40,7 @@
             packages = [
               config.formatter
               pkgs.just
-              pkgs.nodePackages.prettier
+              pkgs.prettier
               pkgs.taplo
               pkgs.watchexec
             ] ++ macSdk;
