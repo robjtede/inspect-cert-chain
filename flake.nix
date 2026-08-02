@@ -34,6 +34,16 @@
             doCheck = true;
           };
 
+          devShells.ci-format = pkgs.mkShell {
+            packages = [
+              config.formatter
+              pkgs.fd
+              pkgs.just
+              pkgs.prettier
+              pkgs.taplo
+            ];
+          };
+
           devShells.default = pkgs.mkShell {
             buildInputs = [ x52just ];
 

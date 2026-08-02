@@ -35,10 +35,13 @@ jobs:
       - name: Check with Clippy
         run: just clippy
 
-  rustfmt:
+  format:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@9f63be77f412a248c9d9a65a4c82cf066cdf8f0c # v35
 
       - name: Install Rust (nightly)
         uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
@@ -46,8 +49,16 @@ jobs:
           toolchain: nightly
           components: rustfmt
 
-      - name: Check with Rustfmt
-        run: cargo fmt -- --check
+      - name: Enter Nix devshell
+        uses: nicknovitski/nix-develop@9be7cfb4b10451d3390a75dc18ad0465bed4932a # v1.2.1
+        with:
+          arguments: .#ci-format
+
+      - name: Format project
+        run: just fmt
+
+      - name: Check formatting diff
+        run: git diff --exit-code
 
   docs:
     runs-on: blacksmith-2vcpu-ubuntu-2404
