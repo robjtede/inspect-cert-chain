@@ -20,11 +20,10 @@
         let
           x52just = inputs'.x52.packages.x52-just;
           naersk' = pkgs.callPackage naersk { };
-          macSdk = [ ] ++ lib.optional pkgs.stdenv.isDarwin [
+          macSdk = [ ] ++ lib.optionals pkgs.stdenv.isDarwin [
             pkgs.pkgsBuildHost.libiconv
           ];
         in
-        rec
         {
           formatter = pkgs.nixpkgs-fmt;
 
