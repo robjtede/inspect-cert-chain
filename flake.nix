@@ -60,6 +60,10 @@
               cp --update=older ${x52just}/*.just .toolchain/
             '';
           };
+
+          devShells.ci-release = pkgs.mkShellNoCC {
+            packages = [ inputs'.x52.packages.x52-release-tools ];
+          };
         };
     };
 }

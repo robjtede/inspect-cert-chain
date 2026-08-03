@@ -38,6 +38,22 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
 
+      - name: Install Nix
+        if: ${{ steps.release-plz.outputs.releases_created == 'true' }}
+        uses: nixbuild/nix-quick-install-action@9f63be77f412a248c9d9a65a4c82cf066cdf8f0c # v35
+
+      - name: Enter Nix devshell
+        if: ${{ steps.release-plz.outputs.releases_created == 'true' }}
+        uses: nicknovitski/nix-develop@9be7cfb4b10451d3390a75dc18ad0465bed4932a # v1.2.1
+        with:
+          arguments: .#ci-release
+
+      - name: Comment on release PR
+        if: ${{ steps.release-plz.outputs.releases_created == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: x52-comment-release-pr '${{ steps.release-plz.outputs.releases }}' '${{ github.sha }}'
+
   upload-assets:
     name: Upload release assets
     needs: release
@@ -105,3 +121,27 @@ jobs:
         uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
           subject-path: "${{ steps.upload-release.outputs.archive }}.*"
+
+  release-assets-uploaded:
+    name: Release assets uploaded
+    if: ${{ needs.release.outputs.releases_created == 'true' }}
+    runs-on: ubuntu-latest
+    needs:
+      - release
+      - upload-assets
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@9f63be77f412a248c9d9a65a4c82cf066cdf8f0c # v35
+
+      - name: Enter Nix devshell
+        uses: nicknovitski/nix-develop@9be7cfb4b10451d3390a75dc18ad0465bed4932a # v1.2.1
+        with:
+          arguments: .#ci-release
+
+      - name: Comment on release PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: x52-comment-release-assets-uploaded '${{ needs.release.outputs.releases }}' '${{ github.sha }}'
