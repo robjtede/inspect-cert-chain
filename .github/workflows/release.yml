@@ -4,12 +4,6 @@ on:
   push:
     branches: [main]
 
-permissions:
-  pull-requests: write
-  contents: write
-  id-token: write
-  attestations: write
-
 jobs:
   release:
     name: Release
@@ -18,11 +12,16 @@ jobs:
     outputs:
       releases: ${{ steps.release-plz.outputs.releases }}
       releases_created: ${{ steps.release-plz.outputs.releases_created }}
+    permissions:
+      contents: write
+      id-token: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
@@ -52,7 +51,8 @@ jobs:
         if: ${{ steps.release-plz.outputs.releases_created == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
-        run: x52-comment-release-pr '${{ steps.release-plz.outputs.releases }}' '${{ github.sha }}'
+          RELEASES_JSON: ${{ steps.release-plz.outputs.releases }}
+        run: x52-comment-release-pr "$RELEASES_JSON" "$GITHUB_SHA"
 
   upload-assets:
     name: Upload release assets
@@ -75,6 +75,10 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
 
     env:
       CARGO_INCREMENTAL: 0
@@ -89,6 +93,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ env.RELEASE_TAG }}
+          persist-credentials: false
 
       - name: Install nasm
         if: matrix.os == 'windows-latest'
@@ -129,9 +134,14 @@ jobs:
     needs:
       - release
       - upload-assets
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install Nix
         uses: nixbuild/nix-quick-install-action@9f63be77f412a248c9d9a65a4c82cf066cdf8f0c # v35
@@ -144,4 +154,5 @@ jobs:
       - name: Comment on release PR
         env:
           GH_TOKEN: ${{ github.token }}
-        run: x52-comment-release-assets-uploaded '${{ needs.release.outputs.releases }}' '${{ github.sha }}'
+          RELEASES_JSON: ${{ needs.release.outputs.releases }}
+        run: x52-comment-release-assets-uploaded "$RELEASES_JSON" "$GITHUB_SHA"
